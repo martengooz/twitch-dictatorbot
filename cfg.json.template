@@ -1,0 +1,7 @@
+{
+    "username": "<bot_username>",
+    "password": "oauth:0123456789abcdefghijABCDEFGHIJ",
+    "channels": [
+        "martengooz"
+    ]
+}
