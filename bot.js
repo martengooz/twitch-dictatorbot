@@ -84,6 +84,10 @@ function onMessageHandler(target, context, msg, self) {
                 client.say(target, "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.");
                 console.log("Showing help message");
                 return;
+            } else if (argument === "reset") {
+                reset(channel);
+                console.log("Resetting the list");
+                return;
             } else if (argument.startsWith("@")) { // User
                 const user = detag(argument);
                 const num = getNumDeletedMessages(channel, user);
@@ -142,6 +146,10 @@ function getTopListString(channel) {
     // Remove last comma
     str = str.substring(0, str.length - 2);
     return str;
+}
+
+function reset(channel) {
+    deletedMessages[channel] = [];
 }
 
 // Connect to Twitch:
