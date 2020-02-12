@@ -1,9 +1,11 @@
 require('./helpers.js');
 const cfg = require('./cfg.json');
 const tmi = require('tmi.js');
+const helper = require('./helpers.js');
 const dbHandler = require('./db.js')
-let db = new dbHandler(cfg);
 const botCommands = require('./botCommands.js')
+
+let db = new dbHandler(cfg);
 
 // Define configuration options
 const opts = {
@@ -19,6 +21,7 @@ const opts = {
 };
 // Create a client with our options
 const client = new tmi.client(opts);
+let bot = new botCommands(client, db);
 
 // Register our event handlers (defined below)
 client.on('message', onMessageHandler);
@@ -39,11 +42,9 @@ function onBanHandler(channel, username, deletedMessage, userstate) {
     // Remove from high score
 }
 
-
 function onMessageDeletedHandler(channel, username, deletedMessage, userstate) {
-    db.add(channel, username)
+    db.add(helper.dehash(channel), username)
 }
-
 
 // Called every time a message comes in
 function onMessageHandler(target, context, msg, self) {
@@ -51,7 +52,7 @@ function onMessageHandler(target, context, msg, self) {
     if (self) {
         return;
     }
-    botCommands.executeCommand(target, context, msg)
+    bot.executeCommand(target, context, msg)
 }
 
 function getNumDeletedMessages(channel, user) {

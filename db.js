@@ -1,24 +1,43 @@
-require('./helpers.js');
+const helper = require('./helpers.js');
+const fs = require('fs')
 
 module.exports = class Db {
     constructor(config) {
         this.deletedMessages = {};
         this.noTopList = 5;
+        this.db = config.dbPath;
     }
-     dehash(hashedString) {
-        return hashedString.replace('#', '');
+
+    writeToDb(channel, key, value) {
+        var db = this.getChannelDb(channel);
+        db[key] = value;
+        fs.writeFile(`${this.db}/${channel}.json`, JSON.stringify(db, null, 4), (err) => {
+            if (err) {
+                console.error(err);
+                return;
+            };
+            console.log(`Written to ${this.db}/${channel}.json`);
+        });
     }
-     detag(taggedString) {
-        return taggedString.replace('@', '');
+
+    getChannelDb(channel) {
+        const jsonString = fs.readFileSync(`${this.db}/${channel}.json`, 'utf8');
+        const res = JSON.parse(jsonString);
+        return res;
+    }
+
+    getDeletedMessages(channel) {
+        return this.getChannelDb(channel)["deletedMessages"];
     }
 
     getTopList(channel) {
+        let deletedMessages = this.getDeletedMessages(channel);
         var sortable = [];
         console.log("Getting top list for " + channel);
-        for (var user in this.deletedMessages[channel]) {
+        for (var user in deletedMessages) {
             sortable.push({
                 username: user,
-                num: this.deletedMessages[channel][user]
+                num: deletedMessages[user]
             });
         }
 
@@ -43,28 +62,23 @@ module.exports = class Db {
     }
 
     getNumDeletedMessages(channel, user) {
+        let deletedMessages = this.getDeletedMessages(channel);
         var num = 0;
-        if (channel in this.deletedMessages) {
-            if (user in this.deletedMessages[channel]) {
-                num = this.deletedMessages[channel][user];
-            }
+        if (user in deletedMessages) {
+            num = deletedMessages[user];
         }
         return num;
     }
 
     add(channel, username) {
-        channel = dehash(channel);
-        if (channel in this.deletedMessages) {
-            if (username in this.deletedMessages[channel]) {
-                this.deletedMessages[channel][username]++;
-            } else {
-                this.deletedMessages[channel][username] = 1;
-            }
+        let deletedMessages = this.getDeletedMessages(channel);
+        if (username in deletedMessages) {
+            deletedMessages[username]++;
         } else {
             console.log(`User ${username} not in ${channel} list, adding.`)
-            this.deletedMessages[channel] = {};
-            this.deletedMessages[channel][username] = 1;
+            deletedMessages[username] = 1;
         }
+        this.writeToDb(channel, "deletedMessages", deletedMessages);
         console.log(`Deleted message for ${username} in ${channel}`);
     }
 
