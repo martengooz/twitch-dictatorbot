@@ -1,5 +1,10 @@
+require('./helpers.js');
 const cfg = require('./cfg.json');
 const tmi = require('tmi.js');
+const dbHandler = require('./db.js')
+
+
+let db = new dbHandler(cfg);
 
 // Define configuration options
 const opts = {
@@ -17,7 +22,6 @@ const opts = {
 const client = new tmi.client(opts);
 
 let deletedMessages = {};
-
 const noTopList = 5;
 
 // Register our event handlers (defined below)
@@ -48,19 +52,7 @@ function onBanHandler(channel, username, deletedMessage, userstate) {
 
 
 function onMessageDeletedHandler(channel, username, deletedMessage, userstate) {
-    channel = dehash(channel);
-    if (channel in deletedMessages) {
-        if (username in deletedMessages[channel]) {
-            deletedMessages[channel][username]++;
-        } else {
-            deletedMessages[channel][username] = 1;
-        }
-    } else {
-        console.log(`User ${username} not in ${channel} list, adding.`)
-        deletedMessages[channel] = {};
-        deletedMessages[channel][username] = 1;
-    }
-    console.log(`Deleted message for ${username} in ${channel}`);
+    db.add(channel, username)
 }
 
 
@@ -90,13 +82,13 @@ function onMessageHandler(target, context, msg, self) {
                 return;
             } else if (argument.startsWith("@")) { // User
                 const user = detag(argument);
-                const num = getNumDeletedMessages(channel, user);
+                const num = db.getNumDeletedMessages(channel, user);
                 client.say(target, `Messages deleted for ${user}: ${num}`);
                 console.log(`Showing deleted for ${user} in ${channel}`);
                 return;
             }
         } else {
-            var topList = getTopListString(channel);
+            var topList = db.getTopListString(channel);
             if (topList) {
                 client.say(target, `List of naughty people:  ${topList}`);
             } else {
@@ -106,50 +98,6 @@ function onMessageHandler(target, context, msg, self) {
             return;
         }
     }
-}
-
-function getNumDeletedMessages(channel, user) {
-    var num = 0;
-    if (channel in deletedMessages) {
-        if (user in deletedMessages[channel]) {
-            num = deletedMessages[channel][user];
-        }
-    }
-    return num;
-}
-
-function getTopList(channel) {
-    var sortable = [];
-    console.log("Getting top list for " + channel);
-    for (var user in deletedMessages[channel]) {
-        sortable.push({
-            username: user, 
-            num: deletedMessages[channel][user]
-        });
-    }
-
-    sortable.sort(function (a, b) {
-        return  b["num"] - a["num"];
-    });
-
-    var topList = sortable.slice(0, noTopList);
-    return topList;
-}
-
-function getTopListString(channel) {
-    var toplist = getTopList(channel);
-    var str = "";
-    for (let user in toplist){
-        str = str + `${toplist[user]["username"]}: ${toplist[user]["num"]}, `;
-    }
-
-    // Remove last comma
-    str = str.substring(0, str.length - 2);
-    return str;
-}
-
-function reset(channel) {
-    deletedMessages[channel] = [];
 }
 
 // Connect to Twitch:
