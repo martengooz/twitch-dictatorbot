@@ -39,7 +39,7 @@ module.exports = class BotCommands {
 
     helpCommand(channel) {
         console.log(`Showing help message in ${channel}`);
-        this.client.say(channel, "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.");
+        this.client.say(channel, this.db.getBotMessage(channel, "help"));
     }
 
     resetCommand(channel) {

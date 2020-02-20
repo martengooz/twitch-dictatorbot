@@ -11,7 +11,6 @@ module.exports = class Db {
 
     createDb(channel) {
         try {
-            
             if (!fs.existsSync(this.db)) {
                 fs.mkdirSync(this.db);
             }
@@ -83,9 +82,26 @@ module.exports = class Db {
         }
     }
 
+    getBotMessages(channel){
+        const db = this.getChannelDb(channel);
+        if (db && db["messages"]) {
+            return db["messages"];
+        }
+        return;
+    }
+
+    getBotMessage(channel, message) {
+        const msgs = this.getBotMessages(channel);
+        if (msgs && msgs[message]) {
+            return msgs[message]
+        }
+        return "";
+    }
+
     getDeletedMessages(channel) {
-        if (this.getChannelDb(channel)) {
-            return this.getChannelDb(channel)["deletedMessages"];
+        var db = this.getChannelDb(channel);
+        if (db) {
+            return db["deletedMessages"];
         }
         return;
     }
