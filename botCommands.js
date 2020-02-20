@@ -17,7 +17,7 @@ module.exports = class BotCommands {
         if (command && command === '!dictatorbot') {
             if (argument) {
                 if (argument === "help") {
-                    this.helpCommand(target);
+                    this.helpCommand(channel);
                     return;
                 } else if (argument.startsWith("@")) { // User
                     const user = helper.detag(argument);
@@ -37,7 +37,7 @@ module.exports = class BotCommands {
         }
     }
 
-    helpCommand(target) {
+    helpCommand(channel) {
         this.client.say(channel, "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.");
         console.log("Showing help message");
     }
