@@ -38,28 +38,28 @@ module.exports = class BotCommands {
     }
 
     helpCommand(channel) {
+        console.log(`Showing help message in ${channel}`);
         this.client.say(channel, "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.");
-        console.log("Showing help message");
     }
 
     resetCommand(channel) {
+        console.log(`Resetting the list in ${channel}`);
         this.db.reset(channel);
-        console.log("Resetting the list");
     }
 
     getUserDeletionsCommand(channel, user) {
+        console.log(`Showing deleted for ${user} in ${channel}`);
         const num = this.db.getNumDeletedMessages(channel, user);
         this.client.say(channel, `Messages deleted for ${user}: ${num}`);
-        console.log(`Showing deleted for ${user} in ${channel}`);
     }
 
     getTopListCommand(channel) {
+        console.log(`Showing toplist in ${channel}`);
         var topList = this.db.getTopListString(channel);
         if (topList) {
             this.client.say(channel, `List of naughty people:  ${topList}`);
         } else {
             this.client.say(channel, `${channel} hasn't been a dictator yet`);
         }
-        console.log(`${topList}`);
     }
 };
