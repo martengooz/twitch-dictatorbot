@@ -5,48 +5,111 @@ module.exports = class Db {
     constructor(config) {
         this.deletedMessages = {};
         this.noTopList = 5;
-        this.db = config.dbPath;
+        this.cfg = config;
+        this.db = this.cfg.dbPath;
     }
 
-    writeToDb(channel, key, value) {
+    createDb(channel) {
+        try {
+            
+            if (!fs.existsSync(this.db)) {
+                fs.mkdirSync(this.db);
+            }
+        } catch (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log(`Creating new db file for ${channel}`);
+        var newdb = {
+            "channelName": channel,
+            "deletedMessages": {}
+        };
+
+        newdb = Object.assign(newdb, this.cfg.defaultValues)
+        newdb["channelName"] = channel;
+        newdb["deletedMessages"] = {};
+        return this.writeToDb(channel, newdb);
+    }
+
+    writeToDb(channel, data) {
+        try {
+            if (!fs.existsSync(this.db)) {
+                this.createDb(channel);
+            }
+            fs.writeFileSync(`${this.db}/${channel}.json`, JSON.stringify(data, null, 4), (err) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                };
+                console.log(`Written to ${this.db}/${channel}.json`);
+            });
+            return data;
+        } catch (err) {
+            console.error(err);
+            return;
+        }
+    }
+
+    writeKeyToDb(channel, key, value) {
         var db = this.getChannelDb(channel);
-        db[key] = value;
-        fs.writeFile(`${this.db}/${channel}.json`, JSON.stringify(db, null, 4), (err) => {
-            if (err) {
-                console.error(err);
-                return;
-            };
-            console.log(`Written to ${this.db}/${channel}.json`);
-        });
+        if (db) {
+            db[key] = value;
+            return this.writeToDb(channel, db);
+        }
+        return;
     }
 
     getChannelDb(channel) {
-        const jsonString = fs.readFileSync(`${this.db}/${channel}.json`, 'utf8');
-        const res = JSON.parse(jsonString);
-        return res;
+        const path = `${this.db}/${channel}.json`;
+        try {
+            if (fs.existsSync(path)) {
+                try {
+                    const jsonString = fs.readFileSync(path, 'utf8');
+                    const res = JSON.parse(jsonString);
+                    return res;
+                }
+                catch (err) {
+                    console.error(err)
+                    return
+                }
+            }
+            else {
+                return this.createDb(channel);
+            }
+        } catch (err) {
+            console.error(err)
+            return
+        }
     }
 
     getDeletedMessages(channel) {
-        return this.getChannelDb(channel)["deletedMessages"];
+        if (this.getChannelDb(channel)) {
+            return this.getChannelDb(channel)["deletedMessages"];
+        }
+        return;
     }
 
     getTopList(channel) {
-        let deletedMessages = this.getDeletedMessages(channel);
-        var sortable = [];
         console.log("Getting top list for " + channel);
-        for (var user in deletedMessages) {
-            sortable.push({
-                username: user,
-                num: deletedMessages[user]
+        let deletedMessages = this.getDeletedMessages(channel);
+        if (deletedMessages) {
+            var sortable = [];
+            for (var user in deletedMessages) {
+                sortable.push({
+                    username: user,
+                    num: deletedMessages[user]
+                });
+            }
+
+            sortable.sort(function (a, b) {
+                return b["num"] - a["num"];
             });
+
+            var topList = sortable.slice(0, this.noTopList);
+            return topList;
         }
-
-        sortable.sort(function (a, b) {
-            return b["num"] - a["num"];
-        });
-
-        var topList = sortable.slice(0, this.noTopList);
-        return topList;
+        return;
     }
 
     getTopListString(channel) {
@@ -64,7 +127,7 @@ module.exports = class Db {
     getNumDeletedMessages(channel, user) {
         let deletedMessages = this.getDeletedMessages(channel);
         var num = 0;
-        if (user in deletedMessages) {
+        if (deletedMessages && user in deletedMessages) {
             num = deletedMessages[user];
         }
         return num;
@@ -72,14 +135,17 @@ module.exports = class Db {
 
     add(channel, username) {
         let deletedMessages = this.getDeletedMessages(channel);
-        if (username in deletedMessages) {
-            deletedMessages[username]++;
-        } else {
-            console.log(`User ${username} not in ${channel} list, adding.`)
-            deletedMessages[username] = 1;
+        if (deletedMessages) {
+            if (username in deletedMessages) {
+                deletedMessages[username]++;
+            } else {
+                console.log(`User ${username} not in ${channel} list, adding.`)
+                deletedMessages[username] = 1;
+            }
+            this.writeKeyToDb(channel, "deletedMessages", deletedMessages);
+            console.log(`Deleted message for ${username} in ${channel}`);
         }
-        this.writeToDb(channel, "deletedMessages", deletedMessages);
-        console.log(`Deleted message for ${username} in ${channel}`);
+        return
     }
 
     remove(channel, user) {
