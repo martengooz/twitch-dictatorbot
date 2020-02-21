@@ -92,10 +92,11 @@ module.exports = class Db {
         return;
     }
 
-    getBotMessage(channel, message) {
+    getBotMessage(channel, message, args) {
         const msgs = this.getBotMessages(channel);
         if (msgs && msgs[message]) {
-            return msgs[message]
+            const interpolatedString = helper.replaceInMessage(msgs[message], args);
+            return interpolatedString;
         }
         return "";
     }

@@ -52,16 +52,16 @@ module.exports = class BotCommands {
     getUserDeletionsCommand(channel, user) {
         console.log(`Showing deleted for ${user} in ${channel}`);
         const num = this.db.getNumDeletedMessages(channel, user);
-        this.client.say(channel, `Messages deleted for ${user}: ${num}`);
+        this.client.say(channel, this.db.getBotMessage(channel, "specificUser", {"channel": channel, "user": user, "num_deleted_messages": num}));
     }
 
     getTopListCommand(channel) {
         console.log(`Showing toplist in ${channel}`);
         var topList = this.db.getTopListString(channel);
         if (topList) {
-            this.client.say(channel, `List of naughty people:  ${topList}`);
+            this.client.say(channel, this.db.getBotMessage(channel, "topList", {"topList": topList}));
         } else {
-            this.client.say(channel, `${channel} hasn't been a dictator yet`);
+            this.client.say(channel, this.db.getBotMessage(channel, "topListEmpty", {"channel": channel}));
         }
     }
 };
