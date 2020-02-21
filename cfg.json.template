@@ -13,4 +13,5 @@
         "topListEmptyMessage": "${channel_name} hasn't been a dictator yet",
         "specificUserMessage": "Messages deleted for ${user}: ${num}"
     }
+    "webUrls": {}
 }
