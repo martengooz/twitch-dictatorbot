@@ -8,10 +8,12 @@
     "defaultValues": {
         "excludedUsers": [],
         "noTopList": 5,
-        "helpMessage": "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.",
-        "topListMessage": "List of naughty people: ${topList}",
-        "topListEmptyMessage": "${channel_name} hasn't been a dictator yet",
-        "specificUserMessage": "Messages deleted for ${user}: ${num}"
-    }
+        "messages": {
+            "help": "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.",
+            "topList": "List of naughty people: ${topList}",
+            "topListEmpty": "${channel_name} hasn't been a dictator yet",
+            "specificUser": "Messages deleted for ${user}: ${num}"
+        }
+    },
     "webUrls": {}
 }
