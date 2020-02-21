@@ -1,3 +1,5 @@
+'use strict';
+
 const helper = require('./helpers.js');
 const fs = require('fs')
 
