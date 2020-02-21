@@ -84,7 +84,7 @@ module.exports = class Db {
         }
     }
 
-    getBotMessages(channel){
+    getBotMessages(channel) {
         const db = this.getChannelDb(channel);
         if (db && db["messages"]) {
             return db["messages"];
@@ -152,16 +152,20 @@ module.exports = class Db {
         return num;
     }
 
+    isExcluded(db, user) {
+        return (db["excludedUsers"].includes(user))
+    }
+
     add(channel, username) {
-        let deletedMessages = this.getDeletedMessages(channel);
-        if (deletedMessages) {
-            if (username in deletedMessages) {
-                deletedMessages[username]++;
+        let db = this.getChannelDb(channel);
+        if (db["deletedMessages"] && !this.isExcluded(db, username)) {
+            if (username in db["deletedMessages"]) {
+                db["deletedMessages"][username]++;
             } else {
                 console.log(`User ${username} not in ${channel} list, adding.`)
-                deletedMessages[username] = 1;
+                db["deletedMessages"][username] = 1;
             }
-            this.writeKeyToDb(channel, "deletedMessages", deletedMessages);
+            this.writeKeyToDb(channel, "deletedMessages", db["deletedMessages"]);
             console.log(`Deleted message for ${username} in ${channel}`);
         }
         return
