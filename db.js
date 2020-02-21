@@ -2,11 +2,23 @@
 
 const helper = require('./helpers.js');
 const fs = require('fs')
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = class Db {
     constructor(config) {
         this.cfg = config;
         this.db = this.cfg.dbPath;
+    }
+
+    createWebSecret(channel) {
+        this.cfg.webUrls[uuidv4()] = channel;
+        fs.writeFileSync("cfg.json", JSON.stringify(this.cfg, null, 4), (err) => {
+            if (err) {
+                console.error(err);
+                return;
+            };
+            console.log(`Written to cfg.json`);
+        });
     }
 
     createDb(channel) {
@@ -28,6 +40,7 @@ module.exports = class Db {
         newdb = Object.assign(newdb, this.cfg.defaultValues)
         newdb["channelName"] = channel;
         newdb["deletedMessages"] = {};
+        this.createWebSecret(channel);
         return this.writeToDb(channel, newdb);
     }
 
