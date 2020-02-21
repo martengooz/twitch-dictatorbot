@@ -41,7 +41,7 @@ module.exports = class BotCommands {
 
     helpCommand(channel) {
         console.log(`Showing help message in ${channel}`);
-        this.client.say(channel, this.db.getBotMessage(channel, "help"));
+        this.client.say(channel, this.db.getBotMessage(channel, "help", {"channel": channel}));
     }
 
     resetCommand(channel) {
