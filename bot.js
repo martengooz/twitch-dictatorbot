@@ -1,6 +1,7 @@
 'use strict';
 
 require('./helpers.js');
+require('./server.js');
 const cfg = require('./cfg.json');
 const tmi = require('tmi.js');
 const helper = require('./helpers.js');

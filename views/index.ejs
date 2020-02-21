@@ -1,0 +1,90 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dictatorbot</title>
+</head>
+
+<body>
+  <p id="success" style="display:none; color: green;">Settings saved.</p>
+  <p id="error" style="display:none; color: red;">Could not save. Make sure the settings are in the correct format.</p>
+  <form id="submitSettingsForm" method="POST">
+    <textarea id="settings" name="settings"><%= db %></textarea>
+    <input id="submitSettings" type="submit" value="Save">
+    <input type="reset" value="Reset">
+  </form>
+  <h2>Sample config</h2>
+  <textarea id="settingsSample" name="settingsSample" readonly disabled><%= sampleDb %></textarea>
+
+</body>
+
+<script>
+  function errorFunction() {
+    document.getElementById("success").style.display = 'none';
+    document.getElementById("error").style.display = 'block';
+  }
+
+  function successFunction() {
+    document.getElementById("success").style.display = 'block';
+    document.getElementById("error").style.display = 'none';
+  }
+
+  document.getElementById("submitSettings").addEventListener("click", function (event) {
+    event.preventDefault()
+    var form = document.getElementById("submitSettingsForm");
+    var settings = document.getElementById("settings").value;
+    try {
+      var settingsJson = JSON.parse(settings);
+
+    } catch (e) {
+      errorFunction();
+      return;
+    }
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open(form.method, form.action, true);
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.onerror = function () {
+      errorFunction();
+      console.log("** An error occurred during the transaction");
+    };
+    xhr.onload = function () {
+      if (xhr.status === 404) {
+        errorFunction();
+      }
+      if (xhr.status === 200) {
+        successFunction();
+      }
+      else {
+        errorFunction();
+      }
+      console.log(xhr.status);
+    };
+    xhr.send(settings);
+  });
+</script>
+
+</html>
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  #settings {
+    height: 45vh;
+    width: 100%;
+    border: none;
+    resize: none;
+  }
+
+  textarea:disabled {
+    height: 320px;
+    width: 100%;
+    color: #888;
+    border: none;
+    resize: none;
+    background-color: white;
+  }
+</style>
