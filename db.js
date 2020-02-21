@@ -5,8 +5,6 @@ const fs = require('fs')
 
 module.exports = class Db {
     constructor(config) {
-        this.deletedMessages = {};
-        this.noTopList = 5;
         this.cfg = config;
         this.db = this.cfg.dbPath;
     }
