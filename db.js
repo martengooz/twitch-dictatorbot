@@ -111,13 +111,13 @@ module.exports = class Db {
 
     getTopList(channel) {
         console.log("Getting top list for " + channel);
-        let deletedMessages = this.getDeletedMessages(channel);
-        if (deletedMessages) {
+        let db = this.getChannelDb(channel);
+        if (db["deletedMessages"]) {
             var sortable = [];
-            for (var user in deletedMessages) {
+            for (var user in db["deletedMessages"]) {
                 sortable.push({
                     username: user,
-                    num: deletedMessages[user]
+                    num: db["deletedMessages"][user]
                 });
             }
 
@@ -125,7 +125,7 @@ module.exports = class Db {
                 return b["num"] - a["num"];
             });
 
-            var topList = sortable.slice(0, this.noTopList);
+            var topList = sortable.slice(0, db["noTopList"]);
             return topList;
         }
         return;
