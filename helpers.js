@@ -1,3 +1,5 @@
+'use strict';
+
 function dehash(hashedString) {
     return hashedString.replace('#', '');
 }

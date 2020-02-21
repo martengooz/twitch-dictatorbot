@@ -1,3 +1,5 @@
+'use strict';
+
 const helper = require('./helpers.js');
 
 module.exports = class BotCommands {
