@@ -32,14 +32,8 @@ module.exports = class Db {
         }
 
         console.log(`Creating new db file for ${channel}`);
-        var newdb = {
-            "channelName": channel,
-            "deletedMessages": {}
-        };
-
-        newdb = Object.assign(newdb, this.cfg.defaultValues)
+        var newdb = this.cfg.defaultValues;
         newdb["channelName"] = channel;
-        newdb["deletedMessages"] = {};
         this.createWebSecret(channel);
         return this.writeToDb(channel, newdb);
     }
@@ -79,11 +73,14 @@ module.exports = class Db {
                 try {
                     const jsonString = fs.readFileSync(path, 'utf8');
                     const res = JSON.parse(jsonString);
+                    if (!this.isValidDb(res)) {
+                        return this.createDb(channel);
+                    }
                     return res;
                 }
                 catch (err) {
                     console.error(err)
-                    return
+                    return this.createDb(channel);
                 }
             }
             else {
@@ -91,7 +88,7 @@ module.exports = class Db {
             }
         } catch (err) {
             console.error(err)
-            return
+            return;
         }
     }
 
@@ -165,6 +162,13 @@ module.exports = class Db {
 
     isExcluded(db, user) {
         return (db["excludedUsers"].includes(user))
+    }
+
+    isValidDb(dbObject){
+        if (Object.keys(dbObject).length === 0 && dbObject.constructor === Object) {
+            return false;
+        }
+        return true;
     }
 
     add(channel, username) {
