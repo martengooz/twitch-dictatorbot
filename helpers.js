@@ -20,7 +20,8 @@ function replaceInMessage(message, params) {
                 continue;
             }
             if (typeof (params[key]) === "string" || typeof (params[key]) === "number") {
-                replacedString = replacedString.replace(`\$\{${key}\}`, params[key]);
+                var re = new RegExp(`\\$\\{${key}\\}`,"g");
+                replacedString = replacedString.replace(re, params[key]);
             }
         }
         return replacedString;
