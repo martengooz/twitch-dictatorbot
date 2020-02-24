@@ -16,7 +16,12 @@
   "scripts": {
     "start": "node bot.js",
     "dev": "nodemon bot.js --ignore '*.json'",
-    "test": "jest tests"
+    "test": "jest"
+  },
+  "jest": {
+    "roots": [
+      "tests"
+    ]
   },
   "repository": {
     "type": "git",
