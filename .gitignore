@@ -1,8 +1,10 @@
 cfg.json
 node_modules
+coverage
 db
 .env
 .DS_Store
+
 
 # Logs
 logs
