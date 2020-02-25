@@ -27,7 +27,7 @@
     "start": "node bot.js",
     "dev": "nodemon bot.js --ignore '*.json'",
     "test": "jest",
-    "lint": "eslint --fix --ext .js --ignore-path .gitignore ."
+    "lint": "eslint --fix --ext .js --ignore-path .gitignore . || true"
   },
   "jest": {
     "roots": [
