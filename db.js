@@ -155,9 +155,7 @@ module.exports = class Db {
    */
   getDeletedMessages(channel) {
     var db = this.getChannelDb(channel);
-    if (db) {
-      return db.deletedMessages;
-    }
+    return db.deletedMessages || {};
   }
 
   /**
