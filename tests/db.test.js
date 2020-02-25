@@ -111,4 +111,35 @@ describe("db", () => {
     });
   });
 
+  describe("Bot messages", () => {
+    test("getBotMessages gets all custom messages", () => {
+      db.getChannelDb = jest.fn(channel => dbValidObj);
+
+      const messages = db.getBotMessages("valid");
+      expect(messages).toStrictEqual(dbValidObj.messages);
+    });
+
+    test("getBotMessage gets a valid custom message with no replacement", () => {
+      db.getBotMessages = jest.fn(channel => dbValidObj.messages);
+
+      const messages = db.getBotMessage("valid", "help", {});
+      expect(messages).toStrictEqual(dbValidObj.messages.help);
+    });
+
+    test("getBotMessage return empty string on npn valid custom message", () => {
+      db.getBotMessages = jest.fn(channel => dbValidObj.messages);
+
+      const messages = db.getBotMessage("valid", "non-valid", {});
+      expect(messages).toEqual("");
+    });
+
+    test("getBotMessage gets a valid custom message with replacement", () => {
+      db.getBotMessages = jest.fn(channel => dbValidObj.messages);
+
+      const messages = db.getBotMessage("valid", "topList", {
+        topList: "toplist"
+      });
+      expect(messages).toEqual("toplist");
+    });
+  });
 });
