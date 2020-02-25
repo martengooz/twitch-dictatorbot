@@ -111,6 +111,15 @@ describe("db", () => {
         ["fewUsers", "deletedMessages", { user1: 3, user2: 4 }]
       ]);
     });
+
+    test("don't add when user is excluded.", () => {
+      db.getChannelDb = jest.fn(() => dbFewUsersObj);
+      db.writeKeyToDb = jest.fn(() => dbFewUsersObj);
+      db.isExcluded = jest.fn(() => true);
+
+      db.add("fewUsers", "user1");
+      expect(db.writeKeyToDb.mock.calls.length).toEqual(0);
+    });
   });
 
   describe("getChannelDb", () => {
