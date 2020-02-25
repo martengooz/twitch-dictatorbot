@@ -201,4 +201,42 @@ describe("db", () => {
       expect(messages).toStrictEqual("user2: 4, user1: 2");
     });
   });
+
+  describe("getDeletedMessages", () => {
+    test("returns all deleted messages", () => {
+      db.getChannelDb = jest.fn(channel => dbValidObj);
+
+      const deletedMessages = db.getDeletedMessages("valid");
+      expect(deletedMessages).toStrictEqual(dbValidObj.deletedMessages);
+    });
+
+    test("returns empty object when db does not exist", () => {
+      db.getChannelDb = jest.fn(channel => dbMissingKeyObj);
+
+      const deletedMessages = db.getDeletedMessages("missing");
+      expect(deletedMessages).toStrictEqual({});
+    });
+
+    test("for user returns 0 when user not exist", () => {
+      db.getDeletedMessages = jest.fn(channel => dbValidObj.deletedMessages);
+
+      const deletedMessages2 = db.getDeletedMessagesForUser("valid", "nonUser");
+      expect(deletedMessages2).toEqual(0);
+
+      db.getDeletedMessages = jest.fn(channel => dbNoUsers.deletedMessages);
+
+      const deletedMessages1 = db.getDeletedMessagesForUser("noUsers", "user1");
+      expect(deletedMessages1).toEqual(0);
+    });
+
+    test("for user returns currect num when user exist", () => {
+      db.getDeletedMessages = jest.fn(channel => dbValidObj.deletedMessages);
+
+      const deletedMessages1 = db.getDeletedMessagesForUser("valid", "user1");
+      expect(deletedMessages1).toEqual(5);
+
+      const deletedMessages2 = db.getDeletedMessagesForUser("valid", "user2");
+      expect(deletedMessages2).toEqual(2);
+    });
+  });
 });
