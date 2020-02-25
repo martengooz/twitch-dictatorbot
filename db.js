@@ -107,7 +107,6 @@ module.exports = class Db {
           }
           return res;
         } catch (err) {
-          console.error(err);
           return this.createDb(channel);
         }
       } else {
