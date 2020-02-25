@@ -1,3 +1,16 @@
 cfg.json
 node_modules
 db
+.env
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
