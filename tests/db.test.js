@@ -60,53 +60,55 @@ const MOCK_FILE_INFO = {
   "db/emptyString.json": "",
   "db/emptyJson.json": "{}"
 };
-
-describe("getChannelDb", () => {
+describe("db", () => {
   beforeEach(() => {
     // Set up some mocked out file info before each test
     require("fs").__setMockFiles(MOCK_FILE_INFO);
   });
+  describe("getChannelDb", () => {
+    test("reads from correct file.", () => {
+      const dbValid = db.getChannelDb("valid");
+      expect(dbValid).toStrictEqual(dbValidObj);
+    });
 
-  test("reads from correct file.", () => {
-    const dbValid = db.getChannelDb("valid");
-    expect(dbValid).toStrictEqual(dbValidObj);
+    test("creates new db if file not exist.", () => {
+      db.createDb = jest.fn(channel => dbValidObj);
+
+      const newdb = db.getChannelDb("nonexistant");
+      expect(db.createDb.mock.calls.length).toBe(1);
+      expect(newdb).toStrictEqual(dbValidObj);
+    });
+
+    test("creates new db if file is empty.", () => {
+      db.createDb = jest.fn(channel => dbValidObj);
+
+      const emptyStringDb = db.getChannelDb("emptyString");
+      expect(db.createDb.mock.calls.length).toBe(1);
+      expect(emptyStringDb).toStrictEqual(dbValidObj);
+
+      const emptyJsonDb = db.getChannelDb("emptyJson");
+      expect(db.createDb.mock.calls.length).toBe(2);
+      expect(emptyJsonDb).toStrictEqual(dbValidObj);
+    });
+
+    test("creates new db if file is invalid.", () => {
+      db.createDb = jest.fn(channel => dbValidObj);
+
+      const invalidDb = db.getChannelDb("invalid");
+      expect(db.createDb.mock.calls.length).toBe(1);
+      expect(invalidDb).toStrictEqual(dbValidObj);
+    });
+
+    // eslint-disable-next-line jest/no-disabled-tests
+    test.skip("creates new key from default if key not exist.", () => {
+      const expectedDb = dbMissingKeyObj;
+      expectedDb.deletedMessages = {};
+      db.createDb = jest.fn(channel => expectedDb);
+
+      const newdb = db.getChannelDb("missing");
+      // expect(db.createDb.mock.calls.length).toBe(1);
+      expect(newdb).toStrictEqual(expectedDb);
+    });
   });
 
-  test("creates new db if file not exist.", () => {
-    db.createDb = jest.fn(channel => dbValidObj);
-
-    const newdb = db.getChannelDb("nonexistant");
-    expect(db.createDb.mock.calls.length).toBe(1);
-    expect(newdb).toStrictEqual(dbValidObj);
-  });
-
-  test("creates new db if file is empty.", () => {
-    db.createDb = jest.fn(channel => dbValidObj);
-
-    const emptyStringDb = db.getChannelDb("emptyString");
-    expect(db.createDb.mock.calls.length).toBe(1);
-    expect(emptyStringDb).toStrictEqual(dbValidObj);
-
-    const emptyJsonDb = db.getChannelDb("emptyJson");
-    expect(db.createDb.mock.calls.length).toBe(2);
-    expect(emptyJsonDb).toStrictEqual(dbValidObj);
-  });
-
-  test("creates new db if file is invalid.", () => {
-    db.createDb = jest.fn(channel => dbValidObj);
-
-    const invalidDb = db.getChannelDb("invalid");
-    expect(db.createDb.mock.calls.length).toBe(1);
-    expect(invalidDb).toStrictEqual(dbValidObj);
-  });
-
-  test.skip("creates new key from default if key not exist.", () => {
-    const expectedDb = dbMissingKeyObj;
-    expectedDb.deletedMessages = {};
-    db.createDb = jest.fn(channel => expectedDb);
-
-    const newdb = db.getChannelDb("missing");
-    // expect(db.createDb.mock.calls.length).toBe(1);
-    expect(newdb).toStrictEqual(expectedDb);
-  });
 });
