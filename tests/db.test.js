@@ -91,6 +91,28 @@ describe("db", () => {
 
     resetDb();
   });
+  describe("add", () => {
+    test("adds new user when not existing.", () => {
+      db.getChannelDb = jest.fn(channel => Object.assign({}, dbNoUsersObj));
+      db.writeKeyToDb = jest.fn(channel => Object.assign({}, dbNoUsersObj));
+
+      db.add("noUsers", "user");
+      expect(db.writeKeyToDb.mock.calls).toEqual([
+        ["noUsers", "deletedMessages", { user: 1 }]
+      ]);
+    });
+
+    test("increments users deleted messages when existing.", () => {
+      db.getChannelDb = jest.fn(channel => Object.assign({}, dbFewUsersObj));
+      db.writeKeyToDb = jest.fn(channel => Object.assign({}, dbFewUsersObj));
+
+      db.add("fewUsers", "user1");
+      expect(db.writeKeyToDb.mock.calls).toEqual([
+        ["fewUsers", "deletedMessages", { user1: 3, user2: 4 }]
+      ]);
+    });
+  });
+
   describe("getChannelDb", () => {
     test("reads from correct file.", () => {
       const dbValid = db.getChannelDb("valid");
