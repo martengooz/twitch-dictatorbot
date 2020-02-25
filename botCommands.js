@@ -1,67 +1,79 @@
-'use strict';
+"use strict";
 
-const helper = require('./helpers.js');
+const helper = require("./helpers.js");
 
 module.exports = class BotCommands {
-    constructor(client, db) {
-        this.client = client;
-        this.db = db;
-    }
-    
-    executeCommand(target, context, msg) {
-        const isMod = context["mod"];
-        const channel = helper.dehash(target);
-        const message = msg.trim().split(" ");
-        const command = message[0];
-        const argument = message[1];
-    
-        // If the command is known, let's execute it
-        if (command && command === '!dictatorbot') {
-            if (argument) {
-                if (argument === "help") {
-                    this.helpCommand(channel);
-                    return;
-                } else if (argument.startsWith("@")) { // User
-                    const user = helper.detag(argument);
-                    this.getUserDeletionsCommand(channel, user);
-                    return;
-                }
-                else if (isMod) {
-                    if (argument === "reset") {
-                        this.resetCommand(channel);
-                        return;
-                    } 
-                }
-            } else {
-                this.getTopListCommand(channel);
-                return;
-            }
+  constructor(client, db) {
+    this.client = client;
+    this.db = db;
+  }
+
+  executeCommand(target, context, msg) {
+    const isMod = context.mod;
+    const channel = helper.dehash(target);
+    const message = msg.trim().split(" ");
+    const command = message[0];
+    const argument = message[1];
+
+    // If the command is known, let's execute it
+    if (command && command === "!dictatorbot") {
+      if (argument) {
+        if (argument === "help") {
+          this.helpCommand(channel);
+        } else if (argument.startsWith("@")) {
+          // User
+          const user = helper.detag(argument);
+          this.getUserDeletionsCommand(channel, user);
+        } else if (isMod) {
+          if (argument === "reset") {
+            this.resetCommand(channel);
+          }
         }
+      } else {
+        this.getTopListCommand(channel);
+      }
     }
+  }
 
-    helpCommand(channel) {
-        console.log(`Showing help message in ${channel}`);
-        this.client.say(channel, this.db.getBotMessage(channel, "help", {"channel": channel}));
-    }
+  helpCommand(channel) {
+    console.log(`Showing help message in ${channel}`);
+    this.client.say(
+      channel,
+      this.db.getBotMessage(channel, "help", { channel: channel })
+    );
+  }
 
-    resetCommand(channel) {
-        console.log(`Resetting the list in ${channel}`);
-        this.db.reset(channel);
-    }
+  resetCommand(channel) {
+    console.log(`Resetting the list in ${channel}`);
+    this.db.reset(channel);
+  }
 
-    getUserDeletionsCommand(channel, user) {
-        console.log(`Showing deleted for ${user} in ${channel}`);
-        const num = this.db.getNumDeletedMessages(channel, user);
-        this.client.say(channel, this.db.getBotMessage(channel, "specificUser", {"channel": channel, "user": user, "num_deleted_messages": num}));
-    }
+  getUserDeletionsCommand(channel, user) {
+    console.log(`Showing deleted for ${user} in ${channel}`);
+    const num = this.db.getNumDeletedMessages(channel, user);
+    this.client.say(
+      channel,
+      this.db.getBotMessage(channel, "specificUser", {
+        channel: channel,
+        user: user,
+        num_deleted_messages: num
+      })
+    );
+  }
 
-    getTopListCommand(channel) {
-        console.log(`Showing toplist in ${channel}`);
-        var topList = this.db.getTopListString(channel);
-        if (topList) {
-            this.client.say(channel, this.db.getBotMessage(channel, "topList", {"topList": topList}));
-        } else {
-            this.client.say(channel, this.db.getBotMessage(channel, "topListEmpty", {"channel": channel}));
-        }
+  getTopListCommand(channel) {
+    console.log(`Showing toplist in ${channel}`);
+    var topList = this.db.getTopListString(channel);
+    if (topList) {
+      this.client.say(
+        channel,
+        this.db.getBotMessage(channel, "topList", { topList: topList })
+      );
+    } else {
+      this.client.say(
+        channel,
+        this.db.getBotMessage(channel, "topListEmpty", { channel: channel })
+      );
     }
+  }
 };
