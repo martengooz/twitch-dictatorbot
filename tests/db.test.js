@@ -4,79 +4,92 @@
 jest.mock("fs");
 
 const DbHandler = require("../db");
-const db = new DbHandler({
-  dbPath: "db",
-  defaultValues: {
-    channelName: "",
-    deletedMessages: {},
+let db = {};
+let dbValidObj = {};
+let dbNoUsersObj = {};
+let dbFewUsersObj = {};
+let dbManyUsersObj = {};
+let dbMissingKeyObj = {};
+let MOCK_FILE_INFO = {};
+
+function resetDb() {
+  db = new DbHandler({
+    dbPath: "db",
+    defaultValues: {
+      channelName: "",
+      deletedMessages: {},
+      excludedUsers: [],
+      noTopList: 5,
+      messages: {
+        help:
+          "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.",
+        topList: "List of naughty people: ${topList}",
+        topListEmpty: "${channel} hasn't been a dictator yet",
+        specificUser: "Messages deleted for ${user}: ${num}"
+      }
+    },
+    webUrls: {
+      "68e2d5e3-d3af-4e99-b571-14f199b12206": "martengooz"
+    }
+  });
+
+  dbValidObj = {
+    channelName: "validchannel",
+    deletedMessages: {
+      user1: 5,
+      user2: 2,
+      user3: 4
+    },
     excludedUsers: [],
     noTopList: 5,
     messages: {
-      help:
-        "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.",
-      topList: "List of naughty people: ${topList}",
-      topListEmpty: "${channel} hasn't been a dictator yet",
-      specificUser: "Messages deleted for ${user}: ${num}"
+      help: "help message",
+      topList: "${topList}",
+      topListEmpty: "no deleted messages",
+      specificUser: "${user}: ${num}"
     }
-  },
-  webUrls: {
-    "68e2d5e3-d3af-4e99-b571-14f199b12206": "martengooz"
-  }
-});
+  };
 
-const dbValidObj = {
-  channelName: "validchannel",
-  deletedMessages: {
-    user1: 5,
-    user2: 2,
-    user3: 4
-  },
-  excludedUsers: [],
-  noTopList: 5,
-  messages: {
-    help: "help message",
-    topList: "${topList}",
-    topListEmpty: "no deleted messages",
-    specificUser: "${user}: ${num}"
-  }
-};
+  dbNoUsersObj = Object.assign({}, dbValidObj, {
+    deletedMessages: {}
+  });
 
-const dbNoUsers = Object.assign({}, dbValidObj, {
-  deletedMessages: {}
-});
+  dbFewUsersObj = Object.assign({}, dbValidObj, {
+    deletedMessages: { user1: 2, user2: 4 }
+  });
 
-const dbFewUsers = Object.assign({}, dbValidObj, {
-  deletedMessages: { user1: 2, user2: 4 }
-});
+  dbManyUsersObj = Object.assign({}, dbValidObj, {
+    deletedMessages: {
+      user1: 8,
+      user2: 2,
+      user3: 4,
+      user4: 4,
+      user5: 7,
+      user6: 2
+    }
+  });
 
-const dbManyUsers = Object.assign({}, dbValidObj, {
-  deletedMessages: {
-    user1: 8,
-    user2: 2,
-    user3: 4,
-    user4: 4,
-    user5: 7,
-    user6: 2
-  }
-});
+  dbMissingKeyObj = Object.assign({}, dbValidObj);
+  delete dbMissingKeyObj.deletedMessages;
 
-const dbMissingKeyObj = Object.assign({}, dbValidObj);
-delete dbMissingKeyObj.deletedMessages;
+  MOCK_FILE_INFO = {
+    "db/valid.json": JSON.stringify(dbValidObj),
+    "db/noUsers.json": JSON.stringify(dbNoUsersObj),
+    "db/fewUsers.json": JSON.stringify(dbFewUsersObj),
+    "db/manyUsers.json": JSON.stringify(dbManyUsersObj),
+    "db/missing.json": JSON.stringify(dbMissingKeyObj),
+    "db/invalid.json": "{ invalid }",
+    "db/emptyString.json": "",
+    "db/emptyJson.json": "{}"
+  };
+}
 
-const MOCK_FILE_INFO = {
-  "db/valid.json": JSON.stringify(dbValidObj),
-  "db/noUsers.json": JSON.stringify(dbNoUsers),
-  "db/fewUsers.json": JSON.stringify(dbFewUsers),
-  "db/manyUsers.json": JSON.stringify(dbManyUsers),
-  "db/missing.json": JSON.stringify(dbMissingKeyObj),
-  "db/invalid.json": "{ invalid }",
-  "db/emptyString.json": "",
-  "db/emptyJson.json": "{}"
-};
 describe("db", () => {
   beforeEach(() => {
     // Set up some mocked out file info before each test
     require("fs").__setMockFiles(MOCK_FILE_INFO);
+
+    resetDb();
   });
   describe("getChannelDb", () => {
     test("reads from correct file.", () => {
@@ -158,14 +171,14 @@ describe("db", () => {
 
   describe("Top list", () => {
     test("getTopList returns empty array list when there is no deleted messages", () => {
-      db.getChannelDb = jest.fn(channel => dbNoUsers);
+      db.getChannelDb = jest.fn(channel => dbNoUsersObj);
 
       const messages = db.getTopList("noUsers");
       expect(messages).toStrictEqual([]);
     });
 
     test("getTopList returns correct correct top list when few users", () => {
-      db.getChannelDb = jest.fn(channel => dbFewUsers);
+      db.getChannelDb = jest.fn(channel => dbFewUsersObj);
 
       const messages = db.getTopList("fewUsers");
       expect(messages).toStrictEqual([
@@ -175,7 +188,7 @@ describe("db", () => {
     });
 
     test("getTopList returns correct number of users when many users", () => {
-      db.getChannelDb = jest.fn(channel => dbManyUsers);
+      db.getChannelDb = jest.fn(channel => dbManyUsersObj);
 
       const messages = db.getTopList("manyUsers");
       expect(messages).toStrictEqual([
@@ -188,14 +201,14 @@ describe("db", () => {
     });
 
     test("getTopListString returns empty message when is no deleted messages", () => {
-      db.getChannelDb = jest.fn(channel => dbNoUsers);
+      db.getChannelDb = jest.fn(channel => dbNoUsersObj);
 
       const messages = db.getTopListString("noUsers");
       expect(messages).toStrictEqual("");
     });
 
     test("getTopListString returns comma separated string without last comma", () => {
-      db.getChannelDb = jest.fn(channel => dbFewUsers);
+      db.getChannelDb = jest.fn(channel => dbFewUsersObj);
 
       const messages = db.getTopListString("fewUsers");
       expect(messages).toStrictEqual("user2: 4, user1: 2");
@@ -223,7 +236,7 @@ describe("db", () => {
       const deletedMessages2 = db.getDeletedMessagesForUser("valid", "nonUser");
       expect(deletedMessages2).toEqual(0);
 
-      db.getDeletedMessages = jest.fn(channel => dbNoUsers.deletedMessages);
+      db.getDeletedMessages = jest.fn(channel => dbNoUsersObj.deletedMessages);
 
       const deletedMessages1 = db.getDeletedMessagesForUser("noUsers", "user1");
       expect(deletedMessages1).toEqual(0);
