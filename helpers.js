@@ -1,11 +1,11 @@
-'use strict';
+"use strict";
 
 function dehash(hashedString) {
-    return hashedString.replace('#', '');
+  return hashedString.replace("#", "");
 }
 
 function detag(taggedString) {
-    return taggedString.replace('@', '');
+  return taggedString.replace("@", "");
 }
 
 /**
@@ -13,20 +13,20 @@ function detag(taggedString) {
  * @param {Object.<string, string|number>} params   Replace key string with key value.
  */
 function replaceInMessage(message, params) {
-    if (params) {
-        var replacedString = message;
-        for (var key in params) {
-            if (!params.hasOwnProperty(key)) {
-                continue;
-            }
-            if (typeof (params[key]) === "string" || typeof (params[key]) === "number") {
-                var re = new RegExp(`\\$\\{${key}\\}`,"g");
-                replacedString = replacedString.replace(re, params[key]);
-            }
-        }
-        return replacedString;
+  if (params) {
+    var replacedString = message;
+    for (var key in params) {
+      if (!(key in params)) {
+        continue;
+      }
+      if (typeof params[key] === "string" || typeof params[key] === "number") {
+        var re = new RegExp(`\\$\\{${key}\\}`, "g");
+        replacedString = replacedString.replace(re, params[key]);
+      }
     }
-    return message;
+    return replacedString;
+  }
+  return message;
 }
 
 module.exports.dehash = dehash;
