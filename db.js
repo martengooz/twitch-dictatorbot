@@ -182,6 +182,7 @@ module.exports = class Db {
       var topList = sortable.slice(0, db.noTopList);
       return topList;
     }
+    return [];
   }
 
   /**
