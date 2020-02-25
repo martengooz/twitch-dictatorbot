@@ -8,6 +8,12 @@ module.exports = class BotCommands {
     this.db = db;
   }
 
+  /**
+   * Executes the appropiate command when the bot is called from chat.
+   * @param {string} target Tmi target.
+   * @param {Object} context Tmi context object.
+   * @param {string} msg The complete message from Twitch chat.
+   */
   executeCommand(target, context, msg) {
     const isMod = context.mod;
     const channel = helper.dehash(target);
@@ -35,6 +41,10 @@ module.exports = class BotCommands {
     }
   }
 
+  /**
+   * Sends the help message to chat.
+   * @param {string} channel The Twitch channel to output message in.
+   */
   helpCommand(channel) {
     console.log(`Showing help message in ${channel}`);
     this.client.say(
@@ -43,14 +53,23 @@ module.exports = class BotCommands {
     );
   }
 
+  /**
+   * Resets all deleted messages for a channel.
+   * @param {string} channel The Twitch channel reset.
+   */
   resetCommand(channel) {
     console.log(`Resetting the list in ${channel}`);
     this.db.reset(channel);
   }
 
+  /**
+   * Sends number of deleted messages for a specific user to chat.
+   * @param {string} channel The Twitch channel to output message in.
+   * @param {string} user A Twitch user.
+   */
   getUserDeletionsCommand(channel, user) {
     console.log(`Showing deleted for ${user} in ${channel}`);
-    const num = this.db.getNumDeletedMessages(channel, user);
+    const num = this.db.getDeletedMessagesForUser(channel, user);
     this.client.say(
       channel,
       this.db.getBotMessage(channel, "specificUser", {
@@ -61,6 +80,10 @@ module.exports = class BotCommands {
     );
   }
 
+  /**
+   * Sends a top list of users with the most deleted messages.
+   * @param {string} channel The Twitch channel to output message in.
+   */
   getTopListCommand(channel) {
     console.log(`Showing toplist in ${channel}`);
     var topList = this.db.getTopListString(channel);
