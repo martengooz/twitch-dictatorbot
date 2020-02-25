@@ -41,20 +41,33 @@ const dbValidObj = {
   }
 };
 
-const dbMissingKeyObj = {
-  channelName: "missingkeychannel",
-  excludedUsers: [],
-  noTopList: 5,
-  messages: {
-    help: "help message",
-    topList: "${topList}",
-    topListEmpty: "no deleted messages",
-    specificUser: "${user}: ${num}"
+const dbNoUsers = Object.assign({}, dbValidObj, {
+  deletedMessages: {}
+});
+
+const dbFewUsers = Object.assign({}, dbValidObj, {
+  deletedMessages: { user1: 2, user2: 4 }
+});
+
+const dbManyUsers = Object.assign({}, dbValidObj, {
+  deletedMessages: {
+    user1: 8,
+    user2: 2,
+    user3: 4,
+    user4: 4,
+    user5: 7,
+    user6: 2
   }
-};
+});
+
+const dbMissingKeyObj = Object.assign({}, dbValidObj);
+delete dbMissingKeyObj.deletedMessages;
 
 const MOCK_FILE_INFO = {
   "db/valid.json": JSON.stringify(dbValidObj),
+  "db/noUsers.json": JSON.stringify(dbNoUsers),
+  "db/fewUsers.json": JSON.stringify(dbFewUsers),
+  "db/manyUsers.json": JSON.stringify(dbManyUsers),
   "db/missing.json": JSON.stringify(dbMissingKeyObj),
   "db/invalid.json": "{ invalid }",
   "db/emptyString.json": "",
@@ -140,6 +153,52 @@ describe("db", () => {
         topList: "toplist"
       });
       expect(messages).toEqual("toplist");
+    });
+  });
+
+  describe("Top list", () => {
+    test("getTopList returns empty array list when there is no deleted messages", () => {
+      db.getChannelDb = jest.fn(channel => dbNoUsers);
+
+      const messages = db.getTopList("noUsers");
+      expect(messages).toStrictEqual([]);
+    });
+
+    test("getTopList returns correct correct top list when few users", () => {
+      db.getChannelDb = jest.fn(channel => dbFewUsers);
+
+      const messages = db.getTopList("fewUsers");
+      expect(messages).toStrictEqual([
+        { user: "user2", num: 4 },
+        { user: "user1", num: 2 }
+      ]);
+    });
+
+    test("getTopList returns correct number of users when many users", () => {
+      db.getChannelDb = jest.fn(channel => dbManyUsers);
+
+      const messages = db.getTopList("manyUsers");
+      expect(messages).toStrictEqual([
+        { user: "user1", num: 8 },
+        { user: "user5", num: 7 },
+        { user: "user3", num: 4 },
+        { user: "user4", num: 4 },
+        { user: "user2", num: 2 }
+      ]);
+    });
+
+    test("getTopListString returns empty message when is no deleted messages", () => {
+      db.getChannelDb = jest.fn(channel => dbNoUsers);
+
+      const messages = db.getTopListString("noUsers");
+      expect(messages).toStrictEqual("");
+    });
+
+    test("getTopListString returns comma separated string without last comma", () => {
+      db.getChannelDb = jest.fn(channel => dbFewUsers);
+
+      const messages = db.getTopListString("fewUsers");
+      expect(messages).toStrictEqual("user2: 4, user1: 2");
     });
   });
 });
