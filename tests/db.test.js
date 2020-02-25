@@ -93,8 +93,8 @@ describe("db", () => {
   });
   describe("add", () => {
     test("adds new user when not existing.", () => {
-      db.getChannelDb = jest.fn(channel => Object.assign({}, dbNoUsersObj));
-      db.writeKeyToDb = jest.fn(channel => Object.assign({}, dbNoUsersObj));
+      db.getChannelDb = jest.fn(() => dbNoUsersObj);
+      db.writeKeyToDb = jest.fn(() => dbNoUsersObj);
 
       db.add("noUsers", "user");
       expect(db.writeKeyToDb.mock.calls).toEqual([
@@ -103,8 +103,8 @@ describe("db", () => {
     });
 
     test("increments users deleted messages when existing.", () => {
-      db.getChannelDb = jest.fn(channel => Object.assign({}, dbFewUsersObj));
-      db.writeKeyToDb = jest.fn(channel => Object.assign({}, dbFewUsersObj));
+      db.getChannelDb = jest.fn(() => dbFewUsersObj);
+      db.writeKeyToDb = jest.fn(() => dbFewUsersObj);
 
       db.add("fewUsers", "user1");
       expect(db.writeKeyToDb.mock.calls).toEqual([
@@ -120,7 +120,7 @@ describe("db", () => {
     });
 
     test("creates new db if file not exist.", () => {
-      db.createDb = jest.fn(channel => dbValidObj);
+      db.createDb = jest.fn(() => dbValidObj);
 
       const newdb = db.getChannelDb("nonexistant");
       expect(db.createDb.mock.calls.length).toBe(1);
@@ -128,7 +128,7 @@ describe("db", () => {
     });
 
     test("creates new db if file is empty.", () => {
-      db.createDb = jest.fn(channel => dbValidObj);
+      db.createDb = jest.fn(() => dbValidObj);
 
       const emptyStringDb = db.getChannelDb("emptyString");
       expect(db.createDb.mock.calls.length).toBe(1);
@@ -140,7 +140,7 @@ describe("db", () => {
     });
 
     test("creates new db if file is invalid.", () => {
-      db.createDb = jest.fn(channel => dbValidObj);
+      db.createDb = jest.fn(() => dbValidObj);
 
       const invalidDb = db.getChannelDb("invalid");
       expect(db.createDb.mock.calls.length).toBe(1);
@@ -151,7 +151,7 @@ describe("db", () => {
     test.skip("creates new key from default if key not exist.", () => {
       const expectedDb = dbMissingKeyObj;
       expectedDb.deletedMessages = {};
-      db.createDb = jest.fn(channel => expectedDb);
+      db.createDb = jest.fn(() => expectedDb);
 
       const newdb = db.getChannelDb("missing");
       // expect(db.createDb.mock.calls.length).toBe(1);
@@ -161,28 +161,28 @@ describe("db", () => {
 
   describe("Bot messages", () => {
     test("getBotMessages gets all custom messages", () => {
-      db.getChannelDb = jest.fn(channel => dbValidObj);
+      db.getChannelDb = jest.fn(() => dbValidObj);
 
       const messages = db.getBotMessages("valid");
       expect(messages).toStrictEqual(dbValidObj.messages);
     });
 
     test("getBotMessage gets a valid custom message with no replacement", () => {
-      db.getBotMessages = jest.fn(channel => dbValidObj.messages);
+      db.getBotMessages = jest.fn(() => dbValidObj.messages);
 
       const messages = db.getBotMessage("valid", "help", {});
       expect(messages).toStrictEqual(dbValidObj.messages.help);
     });
 
     test("getBotMessage return empty string on npn valid custom message", () => {
-      db.getBotMessages = jest.fn(channel => dbValidObj.messages);
+      db.getBotMessages = jest.fn(() => dbValidObj.messages);
 
       const messages = db.getBotMessage("valid", "non-valid", {});
       expect(messages).toEqual("");
     });
 
     test("getBotMessage gets a valid custom message with replacement", () => {
-      db.getBotMessages = jest.fn(channel => dbValidObj.messages);
+      db.getBotMessages = jest.fn(() => dbValidObj.messages);
 
       const messages = db.getBotMessage("valid", "topList", {
         topList: "toplist"
@@ -193,14 +193,14 @@ describe("db", () => {
 
   describe("Top list", () => {
     test("getTopList returns empty array list when there is no deleted messages", () => {
-      db.getChannelDb = jest.fn(channel => dbNoUsersObj);
+      db.getChannelDb = jest.fn(() => dbNoUsersObj);
 
       const messages = db.getTopList("noUsers");
       expect(messages).toStrictEqual([]);
     });
 
     test("getTopList returns correct correct top list when few users", () => {
-      db.getChannelDb = jest.fn(channel => dbFewUsersObj);
+      db.getChannelDb = jest.fn(() => dbFewUsersObj);
 
       const messages = db.getTopList("fewUsers");
       expect(messages).toStrictEqual([
@@ -210,7 +210,7 @@ describe("db", () => {
     });
 
     test("getTopList returns correct number of users when many users", () => {
-      db.getChannelDb = jest.fn(channel => dbManyUsersObj);
+      db.getChannelDb = jest.fn(() => dbManyUsersObj);
 
       const messages = db.getTopList("manyUsers");
       expect(messages).toStrictEqual([
@@ -223,14 +223,14 @@ describe("db", () => {
     });
 
     test("getTopListString returns empty message when is no deleted messages", () => {
-      db.getChannelDb = jest.fn(channel => dbNoUsersObj);
+      db.getChannelDb = jest.fn(() => dbNoUsersObj);
 
       const messages = db.getTopListString("noUsers");
       expect(messages).toStrictEqual("");
     });
 
     test("getTopListString returns comma separated string without last comma", () => {
-      db.getChannelDb = jest.fn(channel => dbFewUsersObj);
+      db.getChannelDb = jest.fn(() => dbFewUsersObj);
 
       const messages = db.getTopListString("fewUsers");
       expect(messages).toStrictEqual("user2: 4, user1: 2");
@@ -239,33 +239,33 @@ describe("db", () => {
 
   describe("getDeletedMessages", () => {
     test("returns all deleted messages", () => {
-      db.getChannelDb = jest.fn(channel => dbValidObj);
+      db.getChannelDb = jest.fn(() => dbValidObj);
 
       const deletedMessages = db.getDeletedMessages("valid");
       expect(deletedMessages).toStrictEqual(dbValidObj.deletedMessages);
     });
 
     test("returns empty object when db does not exist", () => {
-      db.getChannelDb = jest.fn(channel => dbMissingKeyObj);
+      db.getChannelDb = jest.fn(() => dbMissingKeyObj);
 
       const deletedMessages = db.getDeletedMessages("missing");
       expect(deletedMessages).toStrictEqual({});
     });
 
     test("for user returns 0 when user not exist", () => {
-      db.getDeletedMessages = jest.fn(channel => dbValidObj.deletedMessages);
+      db.getDeletedMessages = jest.fn(() => dbValidObj.deletedMessages);
 
       const deletedMessages2 = db.getDeletedMessagesForUser("valid", "nonUser");
       expect(deletedMessages2).toEqual(0);
 
-      db.getDeletedMessages = jest.fn(channel => dbNoUsersObj.deletedMessages);
+      db.getDeletedMessages = jest.fn(() => dbNoUsersObj.deletedMessages);
 
       const deletedMessages1 = db.getDeletedMessagesForUser("noUsers", "user1");
       expect(deletedMessages1).toEqual(0);
     });
 
     test("for user returns currect num when user exist", () => {
-      db.getDeletedMessages = jest.fn(channel => dbValidObj.deletedMessages);
+      db.getDeletedMessages = jest.fn(() => dbValidObj.deletedMessages);
 
       const deletedMessages1 = db.getDeletedMessagesForUser("valid", "user1");
       expect(deletedMessages1).toEqual(5);
