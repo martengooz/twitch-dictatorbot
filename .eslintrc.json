@@ -8,7 +8,6 @@
     "extends": [
         "standard",
         "plugin:jest/recommended",
-        "plugin:security/recommended",
         "plugin:prettier/recommended"
     ],
     "globals": {
@@ -20,7 +19,6 @@
     },
     "plugins": [
         "jest",
-        "security",
         "prettier"
     ],
     "rules": {
