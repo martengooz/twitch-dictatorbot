@@ -233,6 +233,83 @@ describe("db", () => {
     });
   });
 
+  describe("create", () => {
+    test("createWebSecret creates new folder if not exist", () => {
+      const fs = require("fs");
+      jest.mock("fs");
+      fs.mkdirSync = jest.fn().mockImplementationOnce();
+
+      db.createWebSecret = jest.fn();
+      db.writeToDb = jest.fn(() => dbValidObj);
+
+      db.createDb("nonexistant", {});
+      expect(db.createWebSecret.mock.calls).toEqual([["nonexistant"]]);
+      expect(db.writeToDb.mock.calls).toEqual([
+        [
+          "nonexistant",
+          {
+            channelName: "nonexistant",
+            deletedMessages: {},
+            excludedUsers: [],
+            noTopList: 5,
+            messages: {
+              help:
+                "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.",
+              topList: "List of naughty people: ${topList}",
+              topListEmpty: "${channel} hasn't been a dictator yet",
+              specificUser: "Messages deleted for ${user}: ${num}"
+            }
+          }
+        ]
+      ]);
+    });
+
+    test("createDb returns when error creating path.", () => {
+      const fs = require("fs");
+      jest.mock("fs");
+      fs.mkdirSync = jest.fn().mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      const createDb = jest.spyOn(db, "createDb");
+
+      db.createDb("nonexistant", {});
+      expect(createDb.mock.results).toEqual([
+        { type: "return", value: undefined }
+      ]);
+    });
+
+    test("createWebSecret writes to cfg and memory.", () => {
+      const uuid = require("uuid");
+      jest.mock("uuid");
+      uuid.uuidv4 = jest.fn(() => "6002e6d3-d3ce-4cf0-9ed1-1f5dfa3b5792");
+      const fs = require("fs");
+      jest.mock("fs");
+      fs.writeFileSync = jest.fn().mockImplementationOnce();
+
+      db.createWebSecret("nonexistant");
+
+      expect(fs.writeFileSync.mock.calls.length).toBe(1);
+    });
+
+    test("createWebSecret returns when error writing to cfg", () => {
+      const uuid = require("uuid");
+      jest.mock("uuid");
+      uuid.uuidv4 = jest.fn(() => "6002e6d3-d3ce-4cf0-9ed1-1f5dfa3b5792");
+      const fs = require("fs");
+      jest.mock("fs");
+      fs.writeFileSync = jest.fn().mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      const createWebSecret = jest.spyOn(db, "createWebSecret");
+      db.createWebSecret("nonexistant");
+      expect(createWebSecret.mock.results).toEqual([
+        { type: "return", value: undefined }
+      ]);
+    });
+  });
+
   describe("Bot messages", () => {
     test("getBotMessages gets all custom messages", () => {
       db.getChannelDb = jest.fn(() => dbValidObj);
