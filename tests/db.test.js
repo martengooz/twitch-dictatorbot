@@ -122,7 +122,7 @@ describe("db", () => {
     });
   });
 
-  describe("getChannelDb", () => {
+  describe("read", () => {
     test("reads from correct file.", () => {
       const dbValid = db.getChannelDb("valid");
       expect(dbValid).toStrictEqual(dbValidObj);
@@ -165,6 +165,64 @@ describe("db", () => {
       const newdb = db.getChannelDb("missing");
       // expect(db.createDb.mock.calls.length).toBe(1);
       expect(newdb).toStrictEqual(expectedDb);
+    });
+  });
+
+  describe("write", () => {
+    test("writeKeyToDb writes to correct key if exist in db", () => {
+      db.getChannelDb = jest.fn(() => dbValidObj);
+      db.writeToDb = jest.fn(() => dbValidObj);
+      db.createDb = jest.fn();
+
+      db.writeKeyToDb("valid", "channelName", "stillValid");
+      expect(db.writeToDb.mock.calls).toEqual([
+        ["valid", Object.assign({}, dbValidObj, { channelName: "stillValid" })]
+      ]);
+      expect(db.createDb.mock.calls.length).toBe(0);
+    });
+
+    test("writeKeyToDb writes to correct key if not exist in db", () => {
+      db.getChannelDb = jest.fn(() => dbValidObj);
+      db.writeToDb = jest.fn(() => dbMissingKeyObj);
+
+      db.writeKeyToDb("valid", "deletedMessages", {});
+      expect(db.writeToDb.mock.calls).toEqual([
+        ["valid", Object.assign({}, dbValidObj, { deletedMessages: {} })]
+      ]);
+    });
+
+    test("creates new db if file not exist.", () => {
+      db.createDb = jest.fn(() => dbValidObj);
+
+      db.writeToDb("nonexistant", {});
+      expect(db.createDb.mock.calls.length).toBe(1);
+    });
+
+    test("returns even if fs write throws error.", () => {
+      const fs = require("fs");
+      jest.mock("fs");
+      fs.writeFileSync = jest.fn(() => {
+        throw new Error();
+      });
+      const writeToDb = jest.spyOn(db, "writeToDb");
+
+      db.writeToDb("valid", {});
+      expect(writeToDb.mock.results).toEqual([
+        { type: "return", value: undefined }
+      ]);
+    });
+
+    test("returns even if JSON.stringify throws error.", () => {
+      JSON.stringify = jest.fn(() => {
+        throw new Error();
+      });
+      const writeToDb = jest.spyOn(db, "writeToDb");
+
+      db.writeToDb("valid", "invalid input;");
+      expect(writeToDb.mock.results).toEqual([
+        { type: "return", value: undefined }
+      ]);
+      JSON.stringify.mockRestore();
     });
   });
 
@@ -246,7 +304,7 @@ describe("db", () => {
     });
   });
 
-  describe("getDeletedMessages", () => {
+  describe("Deleted Messages", () => {
     test("returns all deleted messages", () => {
       db.getChannelDb = jest.fn(() => dbValidObj);
 

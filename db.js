@@ -54,24 +54,23 @@ module.exports = class Db {
    * @returns {Object} The data written.
    */
   writeToDb(channel, data) {
+    let dataString = "";
+    try {
+      dataString = JSON.stringify(data, null, 4);
+    } catch (err) {
+      console.error(`Failed to stringify ${data}`);
+      return;
+    }
+
     try {
       if (!fs.existsSync(this.db)) {
         this.createDb(channel);
       }
-      fs.writeFileSync(
-        `${this.db}/${channel}.json`,
-        JSON.stringify(data, null, 4),
-        err => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          console.log(`Written to ${this.db}/${channel}.json`);
-        }
-      );
+      fs.writeFileSync(`${this.db}/${channel}.json`, dataString);
+      console.log(`Written to ${this.db}/${channel}.json`);
       return data;
     } catch (err) {
-      console.error(err);
+      console.error(`Failed to write to ${this.db}/${channel}.json`);
     }
   }
 
