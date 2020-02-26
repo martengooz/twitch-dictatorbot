@@ -22,7 +22,7 @@ module.exports = class BotCommands {
     const argument = message[1];
 
     // If the command is known, let's execute it
-    if (command && command === "!dictatorbot") {
+    if (command === "!dictatorbot" || command === "!botutiemersma") {
       if (argument) {
         if (argument === "help") {
           this.helpCommand(channel);
