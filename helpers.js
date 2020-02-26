@@ -26,9 +26,6 @@ function replaceInMessage(message, replacements) {
   if (replacements) {
     var replacedString = message;
     for (var key in replacements) {
-      if (!(key in replacements)) {
-        continue;
-      }
       if (
         typeof replacements[key] === "string" ||
         typeof replacements[key] === "number"
