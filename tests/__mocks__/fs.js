@@ -22,9 +22,12 @@ function writeFileSync(path, data) {
   return Buffer.byteLength(data, "utf8");
 }
 
+function mkdirSync() {}
+
 fs.__setMockFiles = __setMockFiles;
 fs.existsSync = existsSync;
 fs.readFileSync = readFileSync;
 fs.writeFileSync = writeFileSync;
+fs.mkdirSync = mkdirSync;
 
 module.exports = fs;
