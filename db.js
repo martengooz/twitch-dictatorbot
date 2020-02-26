@@ -16,13 +16,13 @@ module.exports = class Db {
    */
   createWebSecret(channel) {
     this.cfg.webUrls[uuidv4()] = channel;
-    fs.writeFileSync("cfg.json", JSON.stringify(this.cfg, null, 4), err => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      console.log(`Written to cfg.json`);
-    });
+    try {
+      fs.writeFileSync("cfg.json", JSON.stringify(this.cfg, null, 4));
+    } catch (err) {
+      console.log("Could not write new url to cfg.json");
+      return;
+    }
+    console.log(`Written to cfg.json`);
   }
 
   /**
@@ -31,13 +31,13 @@ module.exports = class Db {
    * @returns {Object} The written db object.
    */
   createDb(channel) {
-    try {
-      if (!fs.existsSync(this.db)) {
-        fs.mkdirSync(this.db);
+    if (!fs.existsSync(this.db)) {
+      try {
+        fs.mkdirSync(this.db, { recursive: true });
+      } catch (err) {
+        console.error(err);
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      return;
     }
 
     console.log(`Creating new db file for ${channel}`);
@@ -55,6 +55,7 @@ module.exports = class Db {
    */
   writeToDb(channel, data) {
     let dataString = "";
+
     try {
       dataString = JSON.stringify(data, null, 4);
     } catch (err) {
@@ -62,10 +63,12 @@ module.exports = class Db {
       return;
     }
 
+    if (!fs.existsSync(this.db)) {
+      console.error("should not be here");
+      this.createDb(channel);
+    }
+
     try {
-      if (!fs.existsSync(this.db)) {
-        this.createDb(channel);
-      }
       fs.writeFileSync(`${this.db}/${channel}.json`, dataString);
       console.log(`Written to ${this.db}/${channel}.json`);
       return data;
@@ -96,23 +99,19 @@ module.exports = class Db {
    */
   getChannelDb(channel) {
     const path = `${this.db}/${channel}.json`;
-    try {
-      if (fs.existsSync(path)) {
-        try {
-          const jsonString = fs.readFileSync(path, "utf8");
-          const res = JSON.parse(jsonString);
-          if (!this.isValidDb(res)) {
-            return this.createDb(channel);
-          }
-          return res;
-        } catch (err) {
+    if (fs.existsSync(path)) {
+      try {
+        const jsonString = fs.readFileSync(path, "utf8");
+        const res = JSON.parse(jsonString);
+        if (!this.isValidDb(res)) {
           return this.createDb(channel);
         }
-      } else {
+        return res;
+      } catch (err) {
         return this.createDb(channel);
       }
-    } catch (err) {
-      console.error(err);
+    } else {
+      return this.createDb(channel);
     }
   }
 
