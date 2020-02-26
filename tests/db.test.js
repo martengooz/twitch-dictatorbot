@@ -208,12 +208,15 @@ describe("db", () => {
     test("returns even if fs write throws error.", () => {
       const fs = require("fs");
       jest.mock("fs");
-      fs.writeFileSync = jest.fn(() => {
+      fs.writeFileSync = jest.fn().mockImplementationOnce(() => {
         throw new Error();
+      });
+      fs.existsSync = jest.fn().mockImplementationOnce(() => {
+        return true;
       });
       const writeToDb = jest.spyOn(db, "writeToDb");
 
-      db.writeToDb("valid", {});
+      db.writeToDb("valid", { data: "data" });
       expect(writeToDb.mock.results).toEqual([
         { type: "return", value: undefined }
       ]);
