@@ -18,8 +18,13 @@ function readFileSync(path) {
   return mockFiles[path] || "";
 }
 
+function writeFileSync(path, data) {
+  return Buffer.byteLength(data, "utf8");
+}
+
 fs.__setMockFiles = __setMockFiles;
 fs.existsSync = existsSync;
 fs.readFileSync = readFileSync;
+fs.writeFileSync = writeFileSync;
 
 module.exports = fs;
