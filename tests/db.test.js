@@ -84,13 +84,20 @@ function resetDb() {
   };
 }
 
-describe("db", () => {
-  beforeEach(() => {
-    // Set up some mocked out file info before each test
-    require("fs").__setMockFiles(MOCK_FILE_INFO);
+beforeAll(() => {
+  resetDb();
+});
 
-    resetDb();
-  });
+beforeEach(() => {
+  // Set up some mocked out file info before each test
+  require("fs").__setMockFiles(MOCK_FILE_INFO);
+});
+
+afterEach(() => {
+  resetDb();
+});
+
+describe("db", () => {
   describe("add", () => {
     test("adds new user when not existing.", () => {
       db.getChannelDb = jest.fn(() => dbNoUsersObj);
