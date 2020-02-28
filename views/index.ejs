@@ -50,7 +50,7 @@
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     xhr.onerror = function () {
       errorFunction();
-      console.log("** An error occurred during the transaction");
+      console.log(new Date().toISOString() + "** An error occurred during the transaction");
     };
     xhr.onload = function () {
       if (xhr.status === 404) {
@@ -62,7 +62,7 @@
       else {
         errorFunction();
       }
-      console.log(xhr.status);
+      console.log(new Date().toISOString() + xhr.status);
     };
     xhr.send(settings);
   });
