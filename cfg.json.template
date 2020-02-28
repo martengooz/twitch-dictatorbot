@@ -17,5 +17,6 @@
             "specificUser": "Messages deleted for ${user}: ${num}"
         }
     },
-    "webUrls": {}
+    "webUrls": {},
+    "webServerPort": 3000
 }
