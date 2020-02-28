@@ -35,11 +35,15 @@ function connect(client) {
   client
     .connect()
     .then(data => {
-      console.log("Connected on " + new Date().toISOString());
-      console.log(`Connected channels: ${cfg.channels}`);
+      console.log(
+        new Date().toISOString() + "Connected on " + new Date().toISOString()
+      );
+      console.log(
+        new Date().toISOString() + `Connected channels: ${cfg.channels}`
+      );
     })
     .catch(err => {
-      console.log(err);
+      console.log(new Date().toISOString() + err);
     });
 }
 

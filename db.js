@@ -19,10 +19,12 @@ module.exports = class Db {
     try {
       fs.writeFileSync("cfg.json", JSON.stringify(this.cfg, null, 4));
     } catch (err) {
-      console.log("Could not write new url to cfg.json");
+      console.log(
+        new Date().toISOString() + "Could not write new url to cfg.json"
+      );
       return;
     }
-    console.log(`Written to cfg.json`);
+    console.log(new Date().toISOString() + `Written to cfg.json`);
   }
 
   /**
@@ -35,12 +37,14 @@ module.exports = class Db {
       try {
         fs.mkdirSync(this.db, { recursive: true });
       } catch (err) {
-        console.error(err);
+        console.error(new Date().toISOString() + err);
         return;
       }
     }
 
-    console.log(`Creating new db file for ${channel}`);
+    console.log(
+      new Date().toISOString() + `Creating new db file for ${channel}`
+    );
     var newdb = this.cfg.defaultValues;
     newdb.channelName = channel;
     this.createWebSecret(channel);
@@ -59,21 +63,26 @@ module.exports = class Db {
     try {
       dataString = JSON.stringify(data, null, 4);
     } catch (err) {
-      console.error(`Failed to stringify ${data}`);
+      console.error(new Date().toISOString() + `Failed to stringify ${data}`);
       return;
     }
 
     if (!fs.existsSync(this.db)) {
-      console.error("should not be here");
+      console.error(new Date().toISOString() + "should not be here");
       this.createDb(channel);
     }
 
     try {
       fs.writeFileSync(`${this.db}/${channel}.json`, dataString);
-      console.log(`Written to ${this.db}/${channel}.json`);
+      console.log(
+        new Date().toISOString() + `Written to ${this.db}/${channel}.json`
+      );
       return data;
     } catch (err) {
-      console.error(`Failed to write to ${this.db}/${channel}.json`);
+      console.error(
+        new Date().toISOString() +
+          `Failed to write to ${this.db}/${channel}.json`
+      );
     }
   }
 
@@ -162,7 +171,7 @@ module.exports = class Db {
    * @returns {Array.<{user: string, num: number}>} The users with most deleted messages.
    */
   getTopList(channel) {
-    console.log("Getting top list for " + channel);
+    console.log(new Date().toISOString() + "Getting top list for " + channel);
     const db = this.getChannelDb(channel);
     if (db.deletedMessages) {
       var sortable = [];
@@ -247,15 +256,20 @@ module.exports = class Db {
       if (user in db.deletedMessages) {
         db.deletedMessages[user]++;
       } else {
-        console.log(`User ${user} not in ${channel} list, adding.`);
+        console.log(
+          new Date().toISOString() +
+            `User ${user} not in ${channel} list, adding.`
+        );
         db.deletedMessages[user] = 1;
       }
       this.writeKeyToDb(channel, "deletedMessages", db.deletedMessages);
-      console.log(`Deleted message for ${user} in ${channel}`);
+      console.log(
+        new Date().toISOString() + `Deleted message for ${user} in ${channel}`
+      );
     }
   }
 
   remove(channel, user) {
-    console.log("not implemented");
+    console.log(new Date().toISOString() + "not implemented");
   }
 };
