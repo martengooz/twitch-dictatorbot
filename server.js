@@ -7,7 +7,7 @@ const DbHandler = require("./db.js");
 const db = new DbHandler(cfg);
 
 const app = express();
-const port = 8080;
+const port = cfg.webServerPort;
 
 app.set("view engine", "ejs");
 app.set("trust proxy", true);
@@ -76,8 +76,8 @@ app.post("/:secret", (req, res) => {
 
 app.listen(port, err => {
   if (err) {
-    return console.log(
-      new Date().toISOString() + "something bad happened",
+    return console.error(
+      new Date().toISOString() + "could not start server",
       err
     );
   }
