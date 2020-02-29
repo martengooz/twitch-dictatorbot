@@ -18,7 +18,7 @@ module.exports = class BotCommands {
     const isMod = context.mod;
     const channel = helper.dehash(target);
     const message = msg.trim().split(" ");
-    const command = message[0];
+    const command = message[0].toLocaleLowerCase();
     const argument = message[1];
 
     // If the command is known, let's execute it
