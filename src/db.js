@@ -19,8 +19,10 @@ module.exports = class Db {
     try {
       fs.writeFileSync("cfg.json", JSON.stringify(this.cfg, null, 4));
     } catch (err) {
+      console.error("Could not write new url to cfg.json");
       return;
     }
+    console.log(`Added url for #${channel}`);
   }
 
   /**
@@ -33,10 +35,12 @@ module.exports = class Db {
       try {
         fs.mkdirSync(this.db, { recursive: true });
       } catch (err) {
+        console.error(`Could not create db for #${channel} - ${err}`);
         return;
       }
     }
 
+    console.log(`Creating new db file for ${channel}`);
     var newdb = this.cfg.defaultValues;
     newdb.channelName = channel;
     this.createWebSecret(channel);
@@ -55,17 +59,21 @@ module.exports = class Db {
     try {
       dataString = JSON.stringify(data, null, 4);
     } catch (err) {
+      console.error(`Failed to stringify ${data}`);
       return;
     }
 
     if (!fs.existsSync(this.db)) {
+      console.error("DB not found, creating.");
       this.createDb(channel);
     }
 
     try {
       fs.writeFileSync(`${this.db}/${channel}.json`, dataString);
+      console.log(`Written to ${this.db}/${channel}.json`);
       return data;
     } catch (err) {
+      console.error(`Failed to write to ${this.db}/${channel}.json - ${err}`);
     }
   }
 
@@ -154,6 +162,7 @@ module.exports = class Db {
    * @returns {Array.<{user: string, num: number}>} The users with most deleted messages.
    */
   getTopList(channel) {
+    console.log(`Getting top list for ${channel}`);
     const db = this.getChannelDb(channel);
     if (db.deletedMessages) {
       var sortable = [];
@@ -238,12 +247,15 @@ module.exports = class Db {
       if (user in db.deletedMessages) {
         db.deletedMessages[user]++;
       } else {
+        console.log(`User ${user} not in ${channel} list, adding.`);
         db.deletedMessages[user] = 1;
       }
       this.writeKeyToDb(channel, "deletedMessages", db.deletedMessages);
+      console.log(`Deleted message for ${user} in ${channel}`);
     }
   }
 
   remove(channel, user) {
+    console.log("not implemented");
   }
 };

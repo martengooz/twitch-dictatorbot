@@ -23,6 +23,7 @@ module.exports = class BotCommands {
 
     // If the command is known, let's execute it
     if (command === "!dictatorbot" || command === "!botutiemersma") {
+      console.info(`Command recieved (${target}, "${msg}")`);
       if (argument) {
         if (argument === "help") {
           this.helpCommand(channel);
@@ -46,6 +47,7 @@ module.exports = class BotCommands {
    * @param {string} channel The Twitch channel to output message in.
    */
   helpCommand(channel) {
+    console.log(`Showing help message for #${channel}`);
     this.client.say(
       channel,
       this.db.getBotMessage(channel, "help", { channel: channel })
@@ -57,6 +59,7 @@ module.exports = class BotCommands {
    * @param {string} channel The Twitch channel reset.
    */
   resetCommand(channel) {
+    console.log(`Resetting the list for #${channel}`);
     this.db.reset(channel);
   }
 
@@ -66,6 +69,7 @@ module.exports = class BotCommands {
    * @param {string} user A Twitch user.
    */
   getUserDeletionsCommand(channel, user) {
+    console.log(`Showing deleted for ${user} in #${channel}`);
     const num = this.db.getDeletedMessagesForUser(channel, user);
     this.client.say(
       channel,
@@ -82,6 +86,7 @@ module.exports = class BotCommands {
    * @param {string} channel The Twitch channel to output message in.
    */
   getTopListCommand(channel) {
+    console.log(`Showing toplist for #${channel}`);
     var topList = this.db.getTopListString(channel);
     if (topList) {
       this.client.say(

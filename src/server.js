@@ -25,6 +25,7 @@ function getDbNameFromSecret(secret) {
 app.get("/:secret", (req, res) => {
   const dbname = getDbNameFromSecret(req.params.secret);
   if (dbname) {
+    console.log(`Editing config for #${cfg.webUrls[req.params.secret]}`);
 
     var sampleDb = {
       channelName: req.params.secret,
@@ -44,6 +45,7 @@ app.get("/:secret", (req, res) => {
     });
   } else {
     console.error(
+      `Tried to access config with secret ${req.params.secret} from ${req.ip}`
     );
     res.sendStatus(404);
   }
@@ -53,10 +55,12 @@ app.post("/:secret", (req, res) => {
   try {
     if (req.body) {
       var dbn = getDbNameFromSecret(req.params.secret);
+      console.log(`Saving config for #${dbn}`);
       db.writeToDb(dbn, req.body);
       res.sendStatus(200);
     } else {
       console.error(
+        `Failed to save config with secret ${req.params.secret} from ${req.ip}`
       );
       res.sendStatus(400);
     }
@@ -67,6 +71,8 @@ app.post("/:secret", (req, res) => {
 
 app.listen(port, err => {
   if (err) {
+    return console.error("could not start server", err);
   }
 
+  console.log(`Server is listening on ${port}`);
 });
