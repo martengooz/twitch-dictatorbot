@@ -3,7 +3,7 @@
 
 jest.mock("fs");
 
-const DbHandler = require("../db");
+const DbHandler = require("../src/db");
 let db = {};
 let dbValidObj = {};
 let dbNoUsersObj = {};
