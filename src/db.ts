@@ -1,8 +1,8 @@
 "use strict";
 
-const helper = require("./helpers.js");
-const fs = require("fs");
-const { v4: uuidv4 } = require("uuid");
+import fs from "fs";
+import { v4 } from "uuid";
+import helper from "./helpers";
 
 module.exports = class Db {
   constructor(config) {
@@ -15,7 +15,7 @@ module.exports = class Db {
    * @param {string} channel The channel to create a new url for.
    */
   createWebSecret(channel) {
-    this.cfg.webUrls[uuidv4()] = channel;
+    this.cfg.webUrls[v4()] = channel;
     try {
       fs.writeFileSync("cfg.json", JSON.stringify(this.cfg, null, 4));
     } catch (err) {
@@ -41,7 +41,7 @@ module.exports = class Db {
     }
 
     console.log(`Creating new db file for ${channel}`);
-    var newdb = this.cfg.defaultValues;
+    const newdb = this.cfg.defaultValues;
     newdb.channelName = channel;
     this.createWebSecret(channel);
     return this.writeToDb(channel, newdb);
@@ -85,7 +85,7 @@ module.exports = class Db {
    * @returns {Object} The complete written db file.
    */
   writeKeyToDb(channel, key, value) {
-    var db = this.getChannelDb(channel);
+    const db = this.getChannelDb(channel);
     if (db) {
       db[key] = value;
       return this.writeToDb(channel, db);
@@ -152,7 +152,7 @@ module.exports = class Db {
    * @returns {{user: string, num: number}} An object with users as keys and number of deleted messages as their value.
    */
   getDeletedMessages(channel) {
-    var db = this.getChannelDb(channel);
+    const db = this.getChannelDb(channel);
     return db.deletedMessages || {};
   }
 
@@ -165,8 +165,8 @@ module.exports = class Db {
     console.log(`Getting top list for ${channel}`);
     const db = this.getChannelDb(channel);
     if (db.deletedMessages) {
-      var sortable = [];
-      for (var user in db.deletedMessages) {
+      const sortable = [];
+      for (const user in db.deletedMessages) {
         sortable.push({
           user: user,
           num: db.deletedMessages[user]
@@ -177,7 +177,7 @@ module.exports = class Db {
         return b.num - a.num;
       });
 
-      var topList = sortable.slice(0, db.noTopList);
+      const topList = sortable.slice(0, db.noTopList);
       return topList;
     }
     return [];
@@ -189,8 +189,8 @@ module.exports = class Db {
    * @returns {string} The stringified top list.
    */
   getTopListString(channel) {
-    var toplist = this.getTopList(channel);
-    var str = "";
+    const toplist = this.getTopList(channel);
+    let str = "";
     for (const user in toplist) {
       str = str + `${toplist[user].user}: ${toplist[user].num}, `;
     }
@@ -207,7 +207,7 @@ module.exports = class Db {
    */
   getDeletedMessagesForUser(channel, user) {
     const deletedMessages = this.getDeletedMessages(channel);
-    var num = 0;
+    let num = 0;
     if (deletedMessages && user in deletedMessages) {
       num = deletedMessages[user];
     }
