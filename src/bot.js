@@ -1,4 +1,5 @@
 "use strict";
+require("console-stamp")(console, "yyyy-mm-dd HH:MM:ss");
 require("./helpers.js");
 require("./server.js");
 const cfg = require("./cfg.json");
@@ -34,8 +35,11 @@ function connect(client) {
   client
     .connect()
     .then(data => {
+      console.log("Connected to Twitch");
+      console.info(`Connected channels: ${cfg.channels}`);
     })
     .catch(err => {
+      console.error(`Could not connect to Twitch - ${err}`);
     });
 }
 

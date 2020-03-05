@@ -4,6 +4,7 @@
   "description": "",
   "main": "bot.js",
   "dependencies": {
+    "console-stamp": "^0.2.9",
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "tmi.js": "^1.5.0",
