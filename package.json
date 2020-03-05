@@ -27,6 +27,7 @@
     "jest": "^25.1.0",
     "nodemon": "^2.0.2",
     "prettier": "1.19.1",
+    "ts-jest": "^25.2.1",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.3"
   },
@@ -37,11 +38,6 @@
     "test": "jest --coverage --silent",
     "test-watch": "jest --watch --silent",
     "lint": "eslint --fix --ignore-path .gitignore . "
-  },
-  "jest": {
-    "roots": [
-      "tests"
-    ]
   },
   "nodemonConfig": {
     "ignore": [
