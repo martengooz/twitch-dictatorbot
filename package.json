@@ -24,8 +24,8 @@
     "prettier": "1.19.1"
   },
   "scripts": {
-    "start": "node bot.js",
-    "dev": "nodemon bot.js --ignore '*.json'",
+    "start": "node src/bot.js",
+    "dev": "nodemon src/bot.js --ignore '*.json'",
     "test": "jest --coverage --silent",
     "test-watch": "jest --watch --silent",
     "lint": "eslint --fix --ext .js --ignore-path .gitignore . "

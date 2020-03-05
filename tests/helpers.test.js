@@ -1,5 +1,5 @@
 /* eslint-disable no-template-curly-in-string */
-const helpers = require("../helpers");
+const helpers = require("../src/helpers");
 
 describe("Dehash", () => {
   test("Dehash #martengooz to equal martengooz", () => {
