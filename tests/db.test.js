@@ -1,9 +1,8 @@
 /* eslint-disable no-template-curly-in-string */
-"use strict";
+import Db from "../src/db";
 
 jest.mock("fs");
 
-const DbHandler = require("../src/db");
 let db = {};
 let dbValidObj = {};
 let dbNoUsersObj = {};
@@ -13,7 +12,7 @@ let dbMissingKeyObj = {};
 let MOCK_FILE_INFO = {};
 
 function resetDb() {
-  db = new DbHandler({
+  db = new Db({
     dbPath: "db",
     defaultValues: {
       channelName: "",

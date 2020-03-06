@@ -12,9 +12,14 @@
     "uuid": "^3.4.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "@babel/preset-typescript": "^7.8.3",
     "@types/node": "^13.7.7",
     "@typescript-eslint/eslint-plugin": "^2.22.0",
     "@typescript-eslint/parser": "^2.22.0",
+    "babel-jest": "^25.1.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-config-standard": "^14.1.0",
@@ -32,18 +37,19 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "start": "node -r ts-node/register ./src/bot.ts",
+    "start": "node ./build/bot.js",
     "build": "tsc",
-    "dev": "nodemon",
+    "clean": "rm -rf coverage build",
+    "dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/bot.ts",
     "test": "jest --coverage --silent",
-    "test-watch": "jest --watch --silent",
+    "test:watch": "jest --watchAll --silent",
     "lint": "eslint --fix --ignore-path .gitignore . "
   },
   "nodemonConfig": {
     "ignore": [
       "**/*.test.ts",
       "**/*.spec.ts",
-      "*.json",
+      "db",
       ".git",
       "node_modules"
     ],
