@@ -1,10 +1,8 @@
-"use strict";
+import Db from "./db";
+import express from "express";
+import * as cfg from "./cfg.json";
 
-const express = require("express");
-const cfg = require("./cfg.json");
-const DbHandler = require("./db.js");
-
-const db = new DbHandler(cfg);
+const db = new Db(cfg);
 
 const app = express();
 const port = cfg.webServerPort;
@@ -13,13 +11,13 @@ app.set("view engine", "ejs");
 app.set("trust proxy", true);
 app.use(express.json());
 
-function getDbNameFromSecret(secret) {
+function getDbNameFromSecret(secret): string {
   secret = secret.replace("/", "");
 
   if (secret in cfg.webUrls) {
     return cfg.webUrls[secret];
   }
-  return false;
+  return "";
 }
 
 app.get("/:secret", (req, res) => {
@@ -27,16 +25,16 @@ app.get("/:secret", (req, res) => {
   if (dbname) {
     console.log(`Editing config for #${cfg.webUrls[req.params.secret]}`);
 
-    var sampleDb = {
+    let sampleDb = {
       channelName: req.params.secret,
       deletedMessages: {
         user1: 2,
         user2: 1,
         user3: 6
-      }
+      },
+      excludedUsers: ["excludeduser1", "excludeduse2"]
     };
     sampleDb = Object.assign(sampleDb, cfg.defaultValues);
-    sampleDb.excludedUsers = ["excludeduser1", "excludeduse2"];
 
     const dbSettings = db.getChannelDb(getDbNameFromSecret(req.params.secret));
     res.render("index", {
@@ -54,7 +52,7 @@ app.get("/:secret", (req, res) => {
 app.post("/:secret", (req, res) => {
   try {
     if (req.body) {
-      var dbn = getDbNameFromSecret(req.params.secret);
+      const dbn = getDbNameFromSecret(req.params.secret);
       console.log(`Saving config for #${dbn}`);
       db.writeToDb(dbn, req.body);
       res.sendStatus(200);
