@@ -46,7 +46,7 @@ function onMessageDeletedHandler(channel: string, username: string): void {
 // Called every time a message comes in
 function onMessageHandler(
   target: string,
-  context: object,
+  context: Client,
   msg: string,
   self: boolean
 ): void {
