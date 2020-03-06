@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable no-template-curly-in-string */
 import Db from "../src/db";
 
