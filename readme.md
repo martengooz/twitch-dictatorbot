@@ -7,7 +7,8 @@ A Twitch chat bot that keeps track of how many times a user has had it's message
 ## Run the application
 
 ### In production
-```npm run start```
+```npm run deploy```
+```node dist/bot.js```
 
 ### For development
 ```npm run dev```
@@ -19,11 +20,9 @@ A Twitch chat bot that keeps track of how many times a user has had it's message
 ```npm run test```
 
 #### Tests (autorun)
-```npm run test-watch```
-
-
-
+```npm run test:watch```
 
 ## Technologies
-* Nodejs / CommonJS
+* Nodejs / Typescript
 * Jest
+* Webpack
