@@ -287,10 +287,14 @@ describe("db", () => {
       const fs = require("fs");
       jest.mock("fs");
       fs.writeFileSync = jest.fn().mockImplementationOnce();
+      const createWebSecret = jest.spyOn(db, "createWebSecret");
 
       db.createWebSecret("nonexistant");
 
       expect(fs.writeFileSync.mock.calls.length).toBe(1);
+      expect(createWebSecret.mock.results).toEqual([
+        { type: "return", value: true }
+      ]);
     });
 
     test("createWebSecret returns when error writing to cfg", () => {
@@ -302,11 +306,12 @@ describe("db", () => {
       fs.writeFileSync = jest.fn().mockImplementationOnce(() => {
         throw new Error();
       });
-
       const createWebSecret = jest.spyOn(db, "createWebSecret");
+
       db.createWebSecret("nonexistant");
+
       expect(createWebSecret.mock.results).toEqual([
-        { type: "return", value: undefined }
+        { type: "return", value: false }
       ]);
     });
   });
@@ -401,7 +406,7 @@ describe("db", () => {
       db.getChannelDb = jest.fn(() => dbMissingKeyObj);
 
       const deletedMessages = db.getDeletedMessages("missing");
-      expect(deletedMessages).toStrictEqual({});
+      expect(deletedMessages).toStrictEqual([{}]);
     });
 
     test("for user returns 0 when user not exist", () => {
