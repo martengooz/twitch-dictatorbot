@@ -5,11 +5,10 @@ module.exports = {
     main: resolve("./build/bot.js")
   },
   output: {
-    path: resolve("./dist"),
-    filename: "bot.js"
+    path: resolve("./dist")
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js", ".json"]
+    extensions: [".tsx", ".ts", ".js"]
   },
   module: {
     rules: [

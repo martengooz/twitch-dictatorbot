@@ -42,7 +42,7 @@
     "webpack-cli": "^3.3.11"
   },
   "scripts": {
-    "start": "node dist/bot.js",
+    "start": "npm run build && node dist/bot.js",
     "build": "tsc",
     "clean": "rm -rf coverage build dist",
     "dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/bot.ts",
