@@ -1,5 +1,3 @@
-"use strict";
-import * as Console from "console-stamp";
 import { dehash } from "./helpers";
 import "./server";
 import * as cfg from "./cfg.json";
@@ -8,7 +6,8 @@ import { Client } from "tmi.js";
 import Db from "./db";
 import BotCommands from "./botCommands";
 
-(window as any).console = new Console(console, "yyyy-mm-dd HH:MM:ss");
+import Console from "console-stamp";
+Console(console, "yyyy-mm-dd HH:MM:ss");
 
 const db = new Db(cfg);
 
