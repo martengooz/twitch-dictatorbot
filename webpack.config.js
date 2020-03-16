@@ -2,7 +2,7 @@ const { resolve } = require("path");
 
 module.exports = {
   entry: {
-    main: resolve("./build/bot.js")
+    main: resolve("./build/app.js")
   },
   output: {
     path: resolve("./dist")

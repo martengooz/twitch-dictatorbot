@@ -42,10 +42,10 @@
     "webpack-cli": "^3.3.11"
   },
   "scripts": {
-    "start": "npm run build && node dist/bot.js",
+    "start": "node build/app.js",
     "build": "tsc",
     "clean": "rm -rf coverage build dist",
-    "dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/bot.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' 'app.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' app.ts",
     "test": "jest --coverage --silent",
     "test:watch": "jest --watchAll --silent",
     "lint": "eslint --fix --ignore-path .gitignore . ",
