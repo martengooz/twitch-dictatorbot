@@ -4,8 +4,10 @@
         "allowJs": true,
         "target": "es5",
         "sourceMap": true,
+        "noEmitOnError": true,
         "resolveJsonModule": true,
-        "esModuleInterop": true  
+        "esModuleInterop": true,
+        "removeComments": true,
     },
     "include": [
         "./src/**/*"
