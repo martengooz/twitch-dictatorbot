@@ -36,20 +36,31 @@ export default class Bot {
     this.TmiClient.on("messagedeleted", (t, u) => {
       this.onMessageDeletedHandler(t, u, this);
     });
-    // Connect to twitch
-    this.connect(this.TmiClient);
   }
 
-  connect(client: Client): void {
-    client
-      .connect()
-      .then(() => {
-        console.log("Connected to Twitch");
-        console.info(`Connected channels: ${this.cfg.channels}`);
-      })
-      .catch(err => {
-        console.error(`Could not connect to Twitch - ${err}`);
-      });
+  async connect() {
+    // Connect to twitch
+    try {
+      await this.TmiClient.connect();
+    } catch (err) {
+      console.error(`Could not connect to Twitch - ${err}`);
+      return false;
+    }
+    console.log("Connected to Twitch");
+    console.info(`Connected channels: ${this.cfg.channels}`);
+    return true;
+  }
+
+  async disconnect() {
+    // Connect to twitch
+    try {
+      await this.TmiClient.disconnect();
+    } catch (err) {
+      console.error(`Could not disconnect to Twitch - ${err}`);
+      return false;
+    }
+    console.log("Disconnected from Twitch");
+    return true;
   }
 
   public onMessageDeletedHandler(
