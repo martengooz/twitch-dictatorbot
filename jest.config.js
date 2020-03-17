@@ -10,5 +10,6 @@ module.exports = {
     "(.test)\\.(ts|tsx|js)$",
     "/dist/.*\\.(ts|js)$",
     "/build/.*\\.(ts|js)$"
-  ]
+  ],
+  modulePathIgnorePatterns: ["/node_modules/", ".*\\.json$"]
 };
