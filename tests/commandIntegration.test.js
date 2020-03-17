@@ -102,6 +102,21 @@ describe("Twitch command", () => {
       expect(db).toEqual(dbEmpty);
     });
 
+    test("say empty toplist string", async () => {
+      const sayFn = jest.spyOn(bot.TmiClient, "say");
+
+      bot.TmiClient.emit(
+        "message",
+        command.channel,
+        command.context,
+        command.command,
+        command.self
+      );
+
+      expect(sayFn).toHaveBeenCalled();
+      expect(sayFn.mock.calls).toEqual([
+        ["_testuser", "_testuser hasn't been a dictator yet"]
+      ]);
     });
   });
 });
