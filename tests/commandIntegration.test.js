@@ -80,5 +80,28 @@ describe("Twitch command", () => {
     expect(connectFn).toHaveBeenCalled();
     expect(res).toBe(true);
   });
+
+  describe("get toplist command", () => {
+    beforeEach(async () => {
+      await bot.connect();
+    });
+
+    test("create new db", async () => {
+      bot.TmiClient.emit(
+        "message",
+        command.channel,
+        command.context,
+        command.command,
+        command.self
+      );
+
+      const dbExists = fs.existsSync(`${cfg.dbPath}/${command.channel}.json`);
+      expect(dbExists).toBe(true);
+
+      const db = require(`../${cfg.dbPath}/${command.channel}.json`);
+      expect(db).toEqual(dbEmpty);
+    });
+
+    });
   });
 });
