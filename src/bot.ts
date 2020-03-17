@@ -2,8 +2,6 @@ import { dehash } from "./helpers";
 import { Client, Userstate } from "tmi.js";
 import Db from "./db";
 import BotCommands from "./botCommands";
-import Console from "console-stamp";
-Console(console, "yyyy-mm-dd HH:MM:ss");
 
 export default class Bot {
   // Define configuration options
