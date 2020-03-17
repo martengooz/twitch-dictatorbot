@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable no-template-curly-in-string */
 import fs from "fs";
+import path from "path";
 import Bot from "../src/bot";
 import * as cfg from "./cfg.json";
 
@@ -47,7 +48,16 @@ const dbTestuser = {
 };
 
 function reset() {
-  fs.rmdirSync(cfg.dbPath, { recursive: true });
+  // Remove test db files
+  fs.readdir(cfg.dbPath, (err, files) => {
+    if (err) throw err;
+
+    for (const file of files) {
+      fs.unlinkSync(path.join(cfg.dbPath, file), err => {
+        if (err) throw err;
+      });
+    }
+  });
 }
 
 describe("Twitch command", () => {
