@@ -18,8 +18,16 @@ const topListCommand = {
   command: `!${cfg.username}`,
   self: false
 };
+const specificUserCommand = {
+  channel: testChannel,
+  context: {
+    mod: false,
+    turbo: false,
+    username: testUser
+  },
   self: false
 };
+
 const dbEmpty = {
   channelName: testChannel,
   deletedMessages: {},
@@ -58,7 +66,22 @@ async function sendToplistMessage(bot) {
   );
 }
 
+async function sendDeletedMessage(bot, user) {
+  await bot.TmiClient.emit(
+    "message",
+    topListCommand.channel,
+    topListCommand.context,
+    `!${cfg.username} @${user}`,
+    topListCommand.self
+  );
+}
+
 describe("Twitch command", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+    reset();
+  });
+
   let bot = {};
 
   test("bot connects to Twitch", async () => {
@@ -80,11 +103,6 @@ describe("Twitch command", () => {
 
     afterAll(async () => {
       await bot.disconnect();
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-      reset();
     });
 
     test("create new db", async () => {
@@ -163,6 +181,54 @@ describe("Twitch command", () => {
       expect(sayFn.mock.calls[0][1]).toMatch(
         /List of naughty people: _testuser4: 5, _testuser(2|6): 4, _testuser(2|6): 4, _testuser(3|5): 2, _testuser(3|5): 2/
       );
+    });
+  });
+  describe("get specific user command", () => {
+    beforeAll(async () => {
+      bot = new Bot(cfgPath, cfg);
+      await bot.connect();
+    });
+
+    afterAll(async () => {
+      await bot.disconnect();
+    });
+
+    test("say 0 when no db", async () => {
+      const sayFn = jest.spyOn(bot.TmiClient, "say");
+      await sendDeletedMessage(bot, testUser);
+
+      expect(sayFn).toHaveBeenCalled();
+      expect(sayFn.mock.calls).toEqual([
+        ["_testchannel", `Messages deleted for ${testUser}: 0`]
+      ]);
+    });
+
+    test("say 0 if user not in db", async () => {
+      const dbOneUser = Object.assign({}, dbEmpty, {
+        deletedMessages: { _testuser: 1 }
+      });
+      createDb(topListCommand.channel, dbOneUser);
+      const sayFn = jest.spyOn(bot.TmiClient, "say");
+      await sendDeletedMessage(bot, "_not_in_db");
+
+      expect(sayFn).toHaveBeenCalled();
+      expect(sayFn.mock.calls).toEqual([
+        ["_testchannel", "Messages deleted for _not_in_db: 0"]
+      ]);
+    });
+
+    test("say num of deleted messages if in db", async () => {
+      const dbOneUser = Object.assign({}, dbEmpty, {
+        deletedMessages: { _testuser: 1 }
+      });
+      createDb(topListCommand.channel, dbOneUser);
+      const sayFn = jest.spyOn(bot.TmiClient, "say");
+      await sendDeletedMessage(bot, testUser);
+
+      expect(sayFn).toHaveBeenCalled();
+      expect(sayFn.mock.calls).toEqual([
+        ["_testchannel", `Messages deleted for ${testUser}: 1`]
+      ]);
     });
   });
 });
