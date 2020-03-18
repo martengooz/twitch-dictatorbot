@@ -5,9 +5,10 @@ module.exports = {
   transform: {
     "^.+\\.[t|j]sx?$": "babel-jest"
   },
+  collectCoverageFrom: ["**/*.{ts,js,jsx}"],
   coveragePathIgnorePatterns: [
     "/node_modules/",
-    "(.test)\\.(ts|tsx|js)$",
+    "/tests/.*\\.(ts|js)$",
     "/dist/.*\\.(ts|js)$",
     "/build/.*\\.(ts|js)$"
   ],
