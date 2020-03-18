@@ -18,9 +18,11 @@ interface DbType {
 }
 
 export default class Db {
+  cfgPath: string;
   cfg: any;
   db: string;
-  constructor(config: object) {
+  constructor(cfgPath: string, config: any) {
+    this.cfgPath = cfgPath;
     this.cfg = config;
     this.db = this.cfg.dbPath;
   }
@@ -32,7 +34,7 @@ export default class Db {
   createWebSecret(channel: string): boolean {
     this.cfg.webUrls[v4()] = channel;
     try {
-      fs.writeFileSync("cfg.json", JSON.stringify(this.cfg, null, 4));
+      fs.writeFileSync(this.cfgPath, JSON.stringify(this.cfg, null, 4));
     } catch (err) {
       console.error("Could not write new url to cfg.json");
       return false;

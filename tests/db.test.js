@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable no-template-curly-in-string */
 import Db from "../src/db";
+import { cfgPath } from "./testFunctions";
 
 jest.mock("fs");
 
@@ -14,7 +15,7 @@ let dbMissingKeyObj = {};
 let MOCK_FILE_INFO = {};
 
 function resetDb() {
-  db = new Db({
+  db = new Db(cfgPath, {
     dbPath: "db",
     defaultValues: {
       channelName: "",

@@ -5,13 +5,15 @@ import BotCommands from "./botCommands";
 
 export default class Bot {
   // Define configuration options
+  cfgPath: string;
   opts: object;
   db: any;
   TmiClient: Client;
   botCommands: BotCommands;
 
-  constructor(private cfg: any) {
-    this.db = new Db(cfg);
+  constructor(cfgPath: string, private cfg: any) {
+    this.cfgPath = cfgPath;
+    this.db = new Db(cfgPath, cfg);
     this.opts = {
       identity: {
         username: this.cfg.username,
