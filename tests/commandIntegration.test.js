@@ -15,7 +15,9 @@ const topListCommand = {
     turbo: false,
     username: testUser
   },
-  command: "!dic",
+  command: `!${cfg.username}`,
+  self: false
+};
   self: false
 };
 const dbEmpty = {
