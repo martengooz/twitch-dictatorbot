@@ -28,7 +28,11 @@ export default class Bot {
 
     this.TmiClient = Client(this.opts);
 
-    this.botCommands = new BotCommands(this.TmiClient, this.db);
+    this.botCommands = new BotCommands(
+      this.cfg.username,
+      this.TmiClient,
+      this.db
+    );
 
     this.TmiClient.on("message", (t, c, m, s) => {
       this.onMessageHandler(t, c, m, s, this);

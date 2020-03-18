@@ -4,9 +4,11 @@ import * as helper from "./helpers";
 import { Client, Userstate } from "tmi.js";
 
 export default class BotCommands {
+  botName: string;
   client: Client;
   db: any;
-  constructor(client, db) {
+  constructor(botName, client, db) {
+    this.botName = botName;
     this.client = client;
     this.db = db;
   }
@@ -25,7 +27,7 @@ export default class BotCommands {
     const argument = message[1];
 
     // If the command is known, let's execute it
-    if (command === "!dic" || command === "!botutiemersma") {
+    if (command === `!${this.botName.toLocaleLowerCase()}`) {
       console.info(`Command recieved (${target}, "${msg}")`);
       if (argument) {
         if (argument === "help") {
