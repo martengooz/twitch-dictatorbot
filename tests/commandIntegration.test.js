@@ -4,38 +4,23 @@
 import fs from "fs";
 import path from "path";
 import Bot from "../src/bot";
-import * as cfg from "./cfg.json";
+import { cfg, cfgPath, dbPath } from "./testFunctions";
 
-const command = {
-  channel: "_testuser",
+const testChannel = "_testchannel";
+const testUser = "_testuser";
+const topListCommand = {
+  channel: testChannel,
   context: {
     mod: false,
     turbo: false,
-    username: "_testuser"
+    username: testUser
   },
   command: "!dic",
   self: false
 };
-
 const dbEmpty = {
-  channelName: "_testuser",
+  channelName: testChannel,
   deletedMessages: {},
-  excludedUsers: [],
-  noTopList: 5,
-  messages: {
-    help:
-      "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.",
-    topList: "List of naughty people: ${topList}",
-    topListEmpty: "${channel} hasn't been a dictator yet",
-    specificUser: "Messages deleted for ${user}: ${num}"
-  }
-};
-
-const dbTestuser = {
-  channelName: "_testuser",
-  deletedMessages: {
-    _testuser: 1
-  },
   excludedUsers: [],
   noTopList: 5,
   messages: {
@@ -49,74 +34,133 @@ const dbTestuser = {
 
 function reset() {
   // Remove test db files
-  fs.readdir(cfg.dbPath, (err, files) => {
-    if (err) throw err;
-
-    for (const file of files) {
-      fs.unlinkSync(path.join(cfg.dbPath, file), err => {
-        if (err) throw err;
-      });
-    }
+  fs.readdirSync(dbPath).forEach(file => {
+    fs.unlinkSync(path.join(dbPath, file));
   });
+}
+
+function createDb(user, data) {
+  if (!fs.existsSync(dbPath)) {
+    fs.mkdirSync(dbPath, { recursive: true });
+  }
+  fs.writeFileSync(`${dbPath}/${user}.json`, JSON.stringify(data, null, 4));
+}
+
+async function sendToplistMessage(bot) {
+  await bot.TmiClient.emit(
+    "message",
+    topListCommand.channel,
+    topListCommand.context,
+    topListCommand.command,
+    topListCommand.self
+  );
 }
 
 describe("Twitch command", () => {
   let bot = {};
 
-  beforeEach(() => {
-    bot = new Bot(cfg);
-  });
-
-  afterEach(async () => {
-    await bot.disconnect();
-    reset();
-  });
-
   test("bot connects to Twitch", async () => {
+    bot = new Bot(cfgPath, cfg);
     const connectFn = jest.spyOn(bot.TmiClient, "connect");
 
     const res = await bot.connect();
 
     expect(connectFn).toHaveBeenCalled();
     expect(res).toBe(true);
+    await bot.disconnect();
   });
 
   describe("get toplist command", () => {
-    beforeEach(async () => {
+    beforeAll(async () => {
+      bot = new Bot(cfgPath, cfg);
       await bot.connect();
     });
 
+    afterAll(async () => {
+      await bot.disconnect();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      reset();
+    });
+
     test("create new db", async () => {
-      bot.TmiClient.emit(
-        "message",
-        command.channel,
-        command.context,
-        command.command,
-        command.self
+      await sendToplistMessage(bot);
+
+      const dbExists = fs.existsSync(
+        `${dbPath}/${topListCommand.channel}.json`
       );
-
-      const dbExists = fs.existsSync(`${cfg.dbPath}/${command.channel}.json`);
       expect(dbExists).toBe(true);
-
-      const db = require(`../${cfg.dbPath}/${command.channel}.json`);
+      const db = JSON.parse(
+        fs.readFileSync(`${dbPath}/${topListCommand.channel}.json`)
+      );
       expect(db).toEqual(dbEmpty);
     });
 
     test("say empty toplist string", async () => {
       const sayFn = jest.spyOn(bot.TmiClient, "say");
-
-      bot.TmiClient.emit(
-        "message",
-        command.channel,
-        command.context,
-        command.command,
-        command.self
-      );
+      await sendToplistMessage(bot);
 
       expect(sayFn).toHaveBeenCalled();
       expect(sayFn.mock.calls).toEqual([
-        ["_testuser", "_testuser hasn't been a dictator yet"]
+        ["_testchannel", "_testchannel hasn't been a dictator yet"]
       ]);
+    });
+
+    test("say toplist string with one user", async () => {
+      const dbOneUser = Object.assign({}, dbEmpty, {
+        deletedMessages: { _testuser: 1 }
+      });
+      createDb(topListCommand.channel, dbOneUser);
+      const sayFn = jest.spyOn(bot.TmiClient, "say");
+
+      await sendToplistMessage(bot);
+
+      expect(sayFn).toHaveBeenCalled();
+      expect(sayFn.mock.calls).toEqual([
+        ["_testchannel", "List of naughty people: _testuser: 1"]
+      ]);
+    });
+
+    test("say toplist string with three users", async () => {
+      const dbThreeUsers = Object.assign({}, dbEmpty, {
+        deletedMessages: { _testuser1: 1, _testuser2: 4, _testuser3: 2 }
+      });
+      createDb(topListCommand.channel, dbThreeUsers);
+      const sayFn = jest.spyOn(bot.TmiClient, "say");
+
+      await sendToplistMessage(bot);
+
+      expect(sayFn).toHaveBeenCalled();
+      expect(sayFn.mock.calls).toEqual([
+        [
+          "_testchannel",
+          "List of naughty people: _testuser2: 4, _testuser3: 2, _testuser1: 1"
+        ]
+      ]);
+    });
+
+    test("say toplist string with more than max limit users", async () => {
+      const dbMaxUsers = Object.assign({}, dbEmpty, {
+        deletedMessages: {
+          _testuser1: 1,
+          _testuser2: 4,
+          _testuser3: 2,
+          _testuser4: 5,
+          _testuser5: 2,
+          _testuser6: 4
+        }
+      });
+      createDb(topListCommand.channel, dbMaxUsers);
+      const sayFn = jest.spyOn(bot.TmiClient, "say");
+
+      await sendToplistMessage(bot);
+
+      expect(sayFn).toHaveBeenCalled();
+      expect(sayFn.mock.calls[0][1]).toMatch(
+        /List of naughty people: _testuser4: 5, _testuser(2|6): 4, _testuser(2|6): 4, _testuser(3|5): 2, _testuser(3|5): 2/
+      );
     });
   });
 });
