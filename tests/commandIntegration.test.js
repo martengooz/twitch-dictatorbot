@@ -47,6 +47,7 @@ const dbEmpty = {
 };
 
 function reset() {
+  restoreCfg();
   // Remove test db files
   fs.readdirSync(dbPath).forEach(file => {
     fs.unlinkSync(path.join(dbPath, file));
