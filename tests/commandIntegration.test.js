@@ -66,7 +66,7 @@ async function sendToplistMessage(bot) {
   );
 }
 
-async function sendDeletedMessage(bot, user) {
+async function sendSpecificUserMessage(bot, user) {
   await bot.TmiClient.emit(
     "message",
     topListCommand.channel,
@@ -183,6 +183,7 @@ describe("Twitch command", () => {
       );
     });
   });
+
   describe("get specific user command", () => {
     beforeAll(async () => {
       bot = new Bot(cfgPath, cfg);
@@ -195,7 +196,7 @@ describe("Twitch command", () => {
 
     test("say 0 when no db", async () => {
       const sayFn = jest.spyOn(bot.TmiClient, "say");
-      await sendDeletedMessage(bot, testUser);
+      await sendSpecificUserMessage(bot, testUser);
 
       expect(sayFn).toHaveBeenCalled();
       expect(sayFn.mock.calls).toEqual([
@@ -209,7 +210,7 @@ describe("Twitch command", () => {
       });
       createDb(topListCommand.channel, dbOneUser);
       const sayFn = jest.spyOn(bot.TmiClient, "say");
-      await sendDeletedMessage(bot, "_not_in_db");
+      await sendSpecificUserMessage(bot, "_not_in_db");
 
       expect(sayFn).toHaveBeenCalled();
       expect(sayFn.mock.calls).toEqual([
@@ -223,7 +224,7 @@ describe("Twitch command", () => {
       });
       createDb(topListCommand.channel, dbOneUser);
       const sayFn = jest.spyOn(bot.TmiClient, "say");
-      await sendDeletedMessage(bot, testUser);
+      await sendSpecificUserMessage(bot, testUser);
 
       expect(sayFn).toHaveBeenCalled();
       expect(sayFn.mock.calls).toEqual([
