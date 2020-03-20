@@ -11,7 +11,7 @@
         "excludedUsers": [],
         "noTopList": 5,
         "messages": {
-            "help": "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.",
+            "help": "I track deleted messages in this channel. Use !${botName} to see a high score. Add @<username> to see a specific user.",
             "topList": "List of naughty people: ${topList}",
             "topListEmpty": "${channel} hasn't been a dictator yet",
             "specificUser": "Messages deleted for ${user}: ${num}"
