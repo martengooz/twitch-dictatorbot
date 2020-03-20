@@ -109,35 +109,35 @@ async function sendHelpMessage(bot, user = deletedMessageCommand.username) {
   );
 }
 
+test("Bot connects to Twitch", async () => {
+  const bot = new Bot(cfgPath, cfg);
+  const connectFn = jest.spyOn(bot.TmiClient, "connect");
+
+  const res = await bot.connect();
+
+  expect(connectFn).toHaveBeenCalled();
+  expect(res).toBe(true);
+  await bot.disconnect();
+});
+
 describe("Twitch command", () => {
+  let bot = {};
+
+  beforeAll(async () => {
+    bot = new Bot(cfgPath, cfg);
+    await bot.connect();
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
     reset();
   });
 
-  let bot = {};
-
-  test("bot connects to Twitch", async () => {
-    bot = new Bot(cfgPath, cfg);
-    const connectFn = jest.spyOn(bot.TmiClient, "connect");
-
-    const res = await bot.connect();
-
-    expect(connectFn).toHaveBeenCalled();
-    expect(res).toBe(true);
+  afterAll(async () => {
     await bot.disconnect();
   });
 
   describe("get toplist command", () => {
-    beforeAll(async () => {
-      bot = new Bot(cfgPath, cfg);
-      await bot.connect();
-    });
-
-    afterAll(async () => {
-      await bot.disconnect();
-    });
-
     test("create new db", async () => {
       await sendToplistMessage(bot);
 
@@ -218,15 +218,6 @@ describe("Twitch command", () => {
   });
 
   describe("get specific user command", () => {
-    beforeAll(async () => {
-      bot = new Bot(cfgPath, cfg);
-      await bot.connect();
-    });
-
-    afterAll(async () => {
-      await bot.disconnect();
-    });
-
     test("say 0 when no db", async () => {
       const sayFn = jest.spyOn(bot.TmiClient, "say");
       await sendSpecificUserMessage(bot, testUser);
@@ -267,15 +258,6 @@ describe("Twitch command", () => {
   });
 
   describe("deleted message", () => {
-    beforeAll(async () => {
-      bot = new Bot(cfgPath, cfg);
-      await bot.connect();
-    });
-
-    afterAll(async () => {
-      await bot.disconnect();
-    });
-
     test("create new db", async () => {
       const expectedDb = Object.assign({}, dbEmpty, {
         deletedMessages: { _testuser: 1 }
@@ -325,15 +307,6 @@ describe("Twitch command", () => {
   });
 
   describe("help command", () => {
-    beforeAll(async () => {
-      bot = new Bot(cfgPath, cfg);
-      await bot.connect();
-    });
-
-    afterAll(async () => {
-      await bot.disconnect();
-    });
-
     test("say help message", async () => {
       const sayFn = jest.spyOn(bot.TmiClient, "say");
       await sendHelpMessage(bot, testUser);
