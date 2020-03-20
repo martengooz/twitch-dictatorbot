@@ -27,6 +27,10 @@ const specificUserCommand = {
   },
   self: false
 };
+const deletedMessageCommand = {
+  channel: testChannel,
+  username: testUser
+};
 
 const dbEmpty = {
   channelName: testChannel,
@@ -69,10 +73,18 @@ async function sendToplistMessage(bot) {
 async function sendSpecificUserMessage(bot, user) {
   await bot.TmiClient.emit(
     "message",
-    topListCommand.channel,
-    topListCommand.context,
+    specificUserCommand.channel,
+    specificUserCommand.context,
     `!${cfg.username} @${user}`,
-    topListCommand.self
+    specificUserCommand.self
+  );
+}
+
+async function sendDeletedMessage(bot, user = deletedMessageCommand.username) {
+  await bot.TmiClient.emit(
+    "messagedeleted",
+    deletedMessageCommand.channel,
+    user
   );
 }
 
@@ -230,6 +242,64 @@ describe("Twitch command", () => {
       expect(sayFn.mock.calls).toEqual([
         ["_testchannel", `Messages deleted for ${testUser}: 1`]
       ]);
+    });
+  });
+
+  describe("deleted message", () => {
+    beforeAll(async () => {
+      bot = new Bot(cfgPath, cfg);
+      await bot.connect();
+    });
+
+    afterAll(async () => {
+      await bot.disconnect();
+    });
+
+    test("create new db", async () => {
+      const expectedDb = Object.assign({}, dbEmpty, {
+        deletedMessages: { _testuser: 1 }
+      });
+
+      await sendDeletedMessage(bot);
+
+      const dbExists = fs.existsSync(
+        `${dbPath}/${topListCommand.channel}.json`
+      );
+      expect(dbExists).toBe(true);
+      const db = JSON.parse(
+        fs.readFileSync(`${dbPath}/${topListCommand.channel}.json`)
+      );
+      expect(db).toEqual(expectedDb);
+    });
+
+    test("increment user value", async () => {
+      const dbOneUser = Object.assign({}, dbEmpty, {
+        deletedMessages: { _testuser: 1 }
+      });
+      createDb(topListCommand.channel, dbOneUser);
+
+      await sendDeletedMessage(bot);
+
+      dbOneUser.deletedMessages._testuser = 2;
+      const db = JSON.parse(
+        fs.readFileSync(`${dbPath}/${topListCommand.channel}.json`)
+      );
+      expect(db).toEqual(dbOneUser);
+    });
+
+    test("delete multiple users", async () => {
+      createDb(topListCommand.channel, dbEmpty);
+
+      await sendDeletedMessage(bot, "_testuser1");
+      await sendDeletedMessage(bot, "_testuser2");
+
+      const expectedDb = Object.assign({}, dbEmpty, {
+        deletedMessages: { _testuser1: 1, _testuser2: 1 }
+      });
+      const db = JSON.parse(
+        fs.readFileSync(`${dbPath}/${topListCommand.channel}.json`)
+      );
+      expect(db).toEqual(expectedDb);
     });
   });
 });
