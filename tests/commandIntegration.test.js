@@ -4,7 +4,7 @@
 import fs from "fs";
 import path from "path";
 import Bot from "../src/bot";
-import { cfg, cfgPath, dbPath } from "./testFunctions";
+import { cfg, cfgPath, dbPath, restoreCfg } from "./testFunctions";
 
 const testChannel = "_testchannel";
 const testUser = "_testuser";
@@ -27,6 +27,16 @@ const specificUserCommand = {
   },
   self: false
 };
+const helpCommand = {
+  channel: testChannel,
+  context: {
+    mod: false,
+    turbo: false,
+    username: testUser
+  },
+  command: `!${cfg.username} help`,
+  self: false
+};
 const deletedMessageCommand = {
   channel: testChannel,
   username: testUser
@@ -39,7 +49,7 @@ const dbEmpty = {
   noTopList: 5,
   messages: {
     help:
-      "I track deleted messages in this channel. Use !dictatorbot to see a high score. Add @<username> to see a specific user.",
+      "I track deleted messages in this channel. Use !${botName} to see a high score. Add @<username> to see a specific user.",
     topList: "List of naughty people: ${topList}",
     topListEmpty: "${channel} hasn't been a dictator yet",
     specificUser: "Messages deleted for ${user}: ${num}"
@@ -86,6 +96,16 @@ async function sendDeletedMessage(bot, user = deletedMessageCommand.username) {
     "messagedeleted",
     deletedMessageCommand.channel,
     user
+  );
+}
+
+async function sendHelpMessage(bot, user = deletedMessageCommand.username) {
+  await bot.TmiClient.emit(
+    "message",
+    helpCommand.channel,
+    helpCommand.context,
+    helpCommand.command,
+    helpCommand.self
   );
 }
 
@@ -301,6 +321,30 @@ describe("Twitch command", () => {
         fs.readFileSync(`${dbPath}/${topListCommand.channel}.json`)
       );
       expect(db).toEqual(expectedDb);
+    });
+  });
+
+  describe("help command", () => {
+    beforeAll(async () => {
+      bot = new Bot(cfgPath, cfg);
+      await bot.connect();
+    });
+
+    afterAll(async () => {
+      await bot.disconnect();
+    });
+
+    test("say help message", async () => {
+      const sayFn = jest.spyOn(bot.TmiClient, "say");
+      await sendHelpMessage(bot, testUser);
+
+      expect(sayFn).toHaveBeenCalled();
+      expect(sayFn.mock.calls).toEqual([
+        [
+          "_testchannel",
+          `I track deleted messages in this channel. Use !${cfg.username} to see a high score. Add @<username> to see a specific user.`
+        ]
+      ]);
     });
   });
 });

@@ -55,7 +55,10 @@ export default class BotCommands {
     console.log(`Showing help message for #${channel}`);
     this.client.say(
       channel,
-      this.db.getBotMessage(channel, "help", { channel: channel })
+      this.db.getBotMessage(channel, "help", {
+        channel: channel,
+        botName: this.botName
+      })
     );
   }
 
