@@ -97,6 +97,7 @@ describe("db", () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     resetDb();
   });
   describe("add", () => {
@@ -131,11 +132,6 @@ describe("db", () => {
   });
 
   describe("read", () => {
-    test("reads from correct file.", () => {
-      const dbValid = db.getChannelDb("valid");
-      expect(dbValid).toStrictEqual(dbValidObj);
-    });
-
     test("creates new db if file not exist.", () => {
       db.createDb = jest.fn(() => dbValidObj);
 

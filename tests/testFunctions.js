@@ -1,6 +1,7 @@
 import path from "path";
-import * as cfg from "./cfg.json";
 import fs from "fs";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const cfg = require("./cfg.json");
 
 const cfgPath = path.resolve("tests/cfg.json");
 const dbPath = path.resolve(cfg.dbPath);
@@ -11,7 +12,7 @@ const defaultCfg = `{
     "channels": [
         "martengooz"
     ],
-    "dbPath": "db",
+    "dbPath": "tests/db",
     "defaultValues": {
         "channelName": "",
         "deletedMessages": {},
