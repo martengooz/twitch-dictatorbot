@@ -1,8 +1,11 @@
 import Db from "./db";
 import express from "express";
 import * as cfg from "./cfg.json";
+import path from "path";
 
-const db = new Db(cfg);
+const cfgPath = path.resolve("./cfg.json");
+
+const db = new Db(cfgPath, cfg);
 
 const app = express();
 const port = cfg.webServerPort;
