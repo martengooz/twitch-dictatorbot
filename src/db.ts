@@ -1,28 +1,47 @@
 "use strict";
 
-const helper = require("./helpers.js");
-const fs = require("fs");
-const { v4: uuidv4 } = require("uuid");
+import fs from "fs";
+import { v4 } from "uuid";
+import * as helper from "./helpers";
+import path from "path";
 
-module.exports = class Db {
-  constructor(config) {
+interface DbType {
+  channelName: string;
+  deletedMessages: {}[];
+  excludedUsers: string[];
+  noTopList: number;
+  messages: {
+    help: string;
+    topList: string;
+    topListEmpty: string;
+    specificUser: string;
+  };
+}
+
+export default class Db {
+  cfgPath: string;
+  cfg: any;
+  db: string;
+  constructor(cfgPath: string, config: any) {
+    this.cfgPath = cfgPath;
     this.cfg = config;
-    this.db = this.cfg.dbPath;
+    this.db = path.resolve(this.cfg.dbPath);
   }
 
   /**
    * Create a new random url entry for editing a channels config.
    * @param {string} channel The channel to create a new url for.
    */
-  createWebSecret(channel) {
-    this.cfg.webUrls[uuidv4()] = channel;
+  createWebSecret(channel: string): boolean {
+    this.cfg.webUrls[v4()] = channel;
     try {
-      fs.writeFileSync("cfg.json", JSON.stringify(this.cfg, null, 4));
+      fs.writeFileSync(this.cfgPath, JSON.stringify(this.cfg, null, 4));
     } catch (err) {
       console.error("Could not write new url to cfg.json");
-      return;
+      return false;
     }
     console.log(`Added url for #${channel}`);
+    return true;
   }
 
   /**
@@ -30,7 +49,7 @@ module.exports = class Db {
    * @param {string} channel The Twitch channel to create a new db file for.
    * @returns {Object} The written db object.
    */
-  createDb(channel) {
+  createDb(channel: string): DbType {
     if (!fs.existsSync(this.db)) {
       try {
         fs.mkdirSync(this.db, { recursive: true });
@@ -41,7 +60,7 @@ module.exports = class Db {
     }
 
     console.log(`Creating new db file for ${channel}`);
-    var newdb = this.cfg.defaultValues;
+    const newdb = this.cfg.defaultValues;
     newdb.channelName = channel;
     this.createWebSecret(channel);
     return this.writeToDb(channel, newdb);
@@ -53,8 +72,8 @@ module.exports = class Db {
    * @param {*} data The complete data to write.
    * @returns {Object} The data written.
    */
-  writeToDb(channel, data) {
-    let dataString = "";
+  writeToDb(channel: string, data: DbType): DbType {
+    let dataString: string;
 
     try {
       dataString = JSON.stringify(data, null, 4);
@@ -84,8 +103,17 @@ module.exports = class Db {
    * @param {*} value The value to write.
    * @returns {Object} The complete written db file.
    */
-  writeKeyToDb(channel, key, value) {
-    var db = this.getChannelDb(channel);
+  writeKeyToDb(
+    channel: string,
+    key: string,
+    value:
+      | DbType["channelName"]
+      | DbType["deletedMessages"]
+      | DbType["excludedUsers"]
+      | DbType["messages"]
+      | DbType["noTopList"]
+  ): DbType {
+    const db = this.getChannelDb(channel);
     if (db) {
       db[key] = value;
       return this.writeToDb(channel, db);
@@ -97,7 +125,7 @@ module.exports = class Db {
    * @param {string} channel The channel which should read data from.
    * @returns {Object} The parsed json string.
    */
-  getChannelDb(channel) {
+  getChannelDb(channel: string): DbType {
     const path = `${this.db}/${channel}.json`;
     if (fs.existsSync(path)) {
       try {
@@ -120,7 +148,7 @@ module.exports = class Db {
    * @param {string} channel The Twitch channel.
    * @returns {Object} A js object with all custom messages.
    */
-  getBotMessages(channel) {
+  getBotMessages(channel: string): DbType["messages"] {
     const db = this.getChannelDb(channel);
     if (db && db.messages) {
       return db.messages;
@@ -134,7 +162,11 @@ module.exports = class Db {
    * @param {{key: string, value: string|number}} replacements  Replace every occurance of ${<key>} with <value> in <message>.
    * @returns {string} The interpolated string.
    */
-  getBotMessage(channel, messageKey, replacements) {
+  getBotMessage(
+    channel: string,
+    messageKey: string,
+    replacements: { key: string; value: string | number }
+  ): string {
     const msgs = this.getBotMessages(channel);
     if (msgs && messageKey in msgs) {
       const interpolatedString = helper.replaceInMessage(
@@ -149,11 +181,11 @@ module.exports = class Db {
   /**
    * Get all the deleted messages in a channel.
    * @param {string} channel The Twitch channel.
-   * @returns {{user: string, num: number}} An object with users as keys and number of deleted messages as their value.
+   * @returns {[{user: string, num: number}]} An object with users as keys and number of deleted messages as their value.
    */
-  getDeletedMessages(channel) {
-    var db = this.getChannelDb(channel);
-    return db.deletedMessages || {};
+  getDeletedMessages(channel: string): DbType["deletedMessages"] {
+    const db = this.getChannelDb(channel);
+    return db.deletedMessages || [{}];
   }
 
   /**
@@ -161,12 +193,12 @@ module.exports = class Db {
    * @param {string} channel The Twitch channel.
    * @returns {Array.<{user: string, num: number}>} The users with most deleted messages.
    */
-  getTopList(channel) {
+  getTopList(channel: string): Array<{ user: string; num: number }> {
     console.log(`Getting top list for ${channel}`);
     const db = this.getChannelDb(channel);
     if (db.deletedMessages) {
-      var sortable = [];
-      for (var user in db.deletedMessages) {
+      const sortable = [];
+      for (const user in db.deletedMessages) {
         sortable.push({
           user: user,
           num: db.deletedMessages[user]
@@ -177,7 +209,7 @@ module.exports = class Db {
         return b.num - a.num;
       });
 
-      var topList = sortable.slice(0, db.noTopList);
+      const topList = sortable.slice(0, db.noTopList);
       return topList;
     }
     return [];
@@ -188,9 +220,9 @@ module.exports = class Db {
    * @param {string} channel The Twitch channel.
    * @returns {string} The stringified top list.
    */
-  getTopListString(channel) {
-    var toplist = this.getTopList(channel);
-    var str = "";
+  getTopListString(channel: string): string {
+    const toplist = this.getTopList(channel);
+    let str = "";
     for (const user in toplist) {
       str = str + `${toplist[user].user}: ${toplist[user].num}, `;
     }
@@ -205,9 +237,9 @@ module.exports = class Db {
    * @param {string} channel The Twitch channel.
    * @param {string} user The Twitch user.
    */
-  getDeletedMessagesForUser(channel, user) {
+  getDeletedMessagesForUser(channel: string, user: string): number {
     const deletedMessages = this.getDeletedMessages(channel);
-    var num = 0;
+    let num = 0;
     if (deletedMessages && user in deletedMessages) {
       num = deletedMessages[user];
     }
@@ -220,7 +252,7 @@ module.exports = class Db {
    * @param {string} user The user to check.
    * @returns {boolean} True if excluded. False otherwise.
    */
-  isExcluded(db, user) {
+  isExcluded(db: DbType, user: string): boolean {
     return db.excludedUsers.includes(user);
   }
 
@@ -229,7 +261,7 @@ module.exports = class Db {
    * Check if the db object contains all required keys.
    * @param {Object} dbObject The channel db object.
    */
-  isValidDb(dbObject) {
+  isValidDb(dbObject: DbType): boolean {
     if (Object.keys(dbObject).length === 0 && dbObject.constructor === Object) {
       return false;
     }
@@ -241,7 +273,7 @@ module.exports = class Db {
    * @param {string} channel The Twitch channel.
    * @param {string} user The Twitch user.
    */
-  add(channel, user) {
+  add(channel: string, user: string): void {
     const db = this.getChannelDb(channel);
     if (db.deletedMessages && !this.isExcluded(db, user)) {
       if (user in db.deletedMessages) {
@@ -255,7 +287,7 @@ module.exports = class Db {
     }
   }
 
-  remove(channel, user) {
+  remove(channel: string, user: string): void {
     console.log("not implemented");
   }
-};
+}

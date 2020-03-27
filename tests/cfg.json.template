@@ -4,7 +4,7 @@
     "channels": [
         "martengooz"
     ],
-    "dbPath": "db",
+    "dbPath": "tests/db",
     "defaultValues": {
         "channelName": "",
         "deletedMessages": {},

@@ -7,10 +7,21 @@
     "console-stamp": "^0.2.9",
     "ejs": "^3.0.1",
     "express": "^4.17.1",
+    "source-map-loader": "^0.2.4",
     "tmi.js": "^1.5.0",
     "uuid": "^3.4.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "@babel/preset-typescript": "^7.8.3",
+    "@types/express": "^4.17.3",
+    "@types/node": "^13.7.7",
+    "@types/tmi.js": "^1.4.0",
+    "@typescript-eslint/eslint-plugin": "^2.22.0",
+    "@typescript-eslint/parser": "^2.22.0",
+    "babel-jest": "^25.1.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-config-standard": "^14.1.0",
@@ -22,19 +33,37 @@
     "eslint-plugin-standard": "^4.0.1",
     "jest": "^25.1.0",
     "nodemon": "^2.0.2",
-    "prettier": "1.19.1"
+    "prettier": "1.19.1",
+    "ts-jest": "^25.2.1",
+    "ts-loader": "^6.2.1",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
   },
   "scripts": {
-    "start": "node src/bot.js",
-    "dev": "nodemon src/bot.js --ignore '*.json'",
+    "start": "node build/app.js",
+    "build": "tsc",
+    "clean": "rm -rf coverage build dist",
+    "dev": "nodemon --watch 'src/**/*.ts' 'app.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' app.ts",
     "test": "jest --coverage --silent",
-    "test-watch": "jest --watch --silent",
-    "lint": "eslint --fix --ext .js --ignore-path .gitignore . "
+    "test:watch": "jest --watchAll --silent",
+    "lint": "eslint --fix --ignore-path .gitignore . ",
+    "deploy": "npm run clean && npm run build && webpack"
   },
-  "jest": {
-    "roots": [
-      "tests"
-    ]
+  "nodemonConfig": {
+    "ignore": [
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      "db",
+      ".git",
+      "node_modules"
+    ],
+    "watch": [
+      "src"
+    ],
+    "exec": "npm start",
+    "ext": "ts"
   },
   "repository": {
     "type": "git",

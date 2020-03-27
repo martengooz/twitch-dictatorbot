@@ -4,6 +4,8 @@ coverage
 db
 .env
 .DS_Store
+build
+dist
 
 
 # Logs

@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "outDir": "./build",
+        "allowJs": true,
+        "target": "es5",
+        "sourceMap": true,
+        "noEmitOnError": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "removeComments": true,
+    },
+    "include": [
+        "./app.ts",
+        "./src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        ".vscode"
+    ]
+}
