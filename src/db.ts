@@ -3,6 +3,7 @@
 import fs from "fs";
 import { v4 } from "uuid";
 import * as helper from "./helpers";
+import path from "path";
 
 interface DbType {
   channelName: string;
@@ -24,7 +25,7 @@ export default class Db {
   constructor(cfgPath: string, config: any) {
     this.cfgPath = cfgPath;
     this.cfg = config;
-    this.db = this.cfg.dbPath;
+    this.db = path.resolve(this.cfg.dbPath);
   }
 
   /**
