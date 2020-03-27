@@ -18,5 +18,6 @@
         }
     },
     "webUrls": {},
+    "enableWebServer": true,
     "webServerPort": 3000
 }
