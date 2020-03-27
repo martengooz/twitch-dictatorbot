@@ -1,4 +1,3 @@
-import "./src/server";
 import Bot from "./src/bot";
 import Console from "console-stamp";
 import path from "path";
@@ -8,4 +7,9 @@ Console(console, "yyyy-mm-dd HH:MM:ss");
 
 const cfgPath = path.resolve("./src/cfg.json");
 const bot = new Bot(cfgPath, cfg);
+
+if (cfg.enableWebServer) {
+  require("./src/server");
+}
+
 bot.connect();

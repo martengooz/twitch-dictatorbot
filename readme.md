@@ -37,6 +37,8 @@ A config template file can be found in src/cfg.template.json, use this to create
 
 `webUrls` Does not need configuration. When a new channel is added, a secret key is generated to access the channels config from the web server at \<ip or domain name>:\<webserverPort>/\<secret>. Eg. `http://localhost:3000/52597879-95b9-4092-89a4-2e13095b6e82` 
 
+`enableWebServer` Boolean. If true, an internal web server will be deployed listening to the port specified in "webServerPort".
+
 `webServerPort` The port that the web server should listen on.
 
 
