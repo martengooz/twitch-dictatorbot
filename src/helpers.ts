@@ -4,7 +4,7 @@
  * Removes the # character from a string.
  * @param {string} hashedString Any string.
  */
-function dehash(hashedString) {
+function dehash(hashedString: string): string {
   return hashedString.replace("#", "");
 }
 
@@ -12,7 +12,7 @@ function dehash(hashedString) {
  * Removes the @ character from a string.
  * @param {string} taggedString Any string.
  */
-function detag(taggedString) {
+function detag(taggedString: string): string {
   return taggedString.replace("@", "");
 }
 
@@ -22,15 +22,18 @@ function detag(taggedString) {
  * @param {{key: string, value: string|number}} replacements Replace every occurance of ${<key>} with <value> in <message>.
  * @return {string} Replaced string.
  */
-function replaceInMessage(message, replacements) {
+function replaceInMessage(
+  message: string,
+  replacements: { key: string; value: string | number }
+): string {
   if (replacements) {
-    var replacedString = message;
-    for (var key in replacements) {
+    let replacedString = message;
+    for (const key in replacements) {
       if (
         typeof replacements[key] === "string" ||
         typeof replacements[key] === "number"
       ) {
-        var re = new RegExp(`\\$\\{${key}\\}`, "g");
+        const re = new RegExp(`\\$\\{${key}\\}`, "g");
         replacedString = replacedString.replace(re, replacements[key]);
       }
     }
@@ -39,6 +42,4 @@ function replaceInMessage(message, replacements) {
   return message;
 }
 
-module.exports.dehash = dehash;
-module.exports.detag = detag;
-module.exports.replaceInMessage = replaceInMessage;
+export { dehash, detag, replaceInMessage };

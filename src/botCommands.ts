@@ -1,9 +1,14 @@
 "use strict";
 
-const helper = require("./helpers.js");
+import * as helper from "./helpers";
+import { Client, Userstate } from "tmi.js";
 
-module.exports = class BotCommands {
-  constructor(client, db) {
+export default class BotCommands {
+  botName: string;
+  client: Client;
+  db: any;
+  constructor(botName, client, db) {
+    this.botName = botName;
     this.client = client;
     this.db = db;
   }
@@ -14,7 +19,7 @@ module.exports = class BotCommands {
    * @param {Object} context Tmi context object.
    * @param {string} msg The complete message from Twitch chat.
    */
-  executeCommand(target, context, msg) {
+  public executeCommand(target: string, context: Userstate, msg: string): void {
     const isMod = context.mod;
     const channel = helper.dehash(target);
     const message = msg.trim().split(" ");
@@ -22,7 +27,7 @@ module.exports = class BotCommands {
     const argument = message[1];
 
     // If the command is known, let's execute it
-    if (command === "!dictatorbot" || command === "!botutiemersma") {
+    if (command === `!${this.botName.toLocaleLowerCase()}`) {
       console.info(`Command recieved (${target}, "${msg}")`);
       if (argument) {
         if (argument === "help") {
@@ -46,11 +51,14 @@ module.exports = class BotCommands {
    * Sends the help message to chat.
    * @param {string} channel The Twitch channel to output message in.
    */
-  helpCommand(channel) {
+  helpCommand(channel: string): void {
     console.log(`Showing help message for #${channel}`);
     this.client.say(
       channel,
-      this.db.getBotMessage(channel, "help", { channel: channel })
+      this.db.getBotMessage(channel, "help", {
+        channel: channel,
+        botName: this.botName
+      })
     );
   }
 
@@ -58,7 +66,7 @@ module.exports = class BotCommands {
    * Resets all deleted messages for a channel.
    * @param {string} channel The Twitch channel reset.
    */
-  resetCommand(channel) {
+  resetCommand(channel: string): void {
     console.log(`Resetting the list for #${channel}`);
     this.db.reset(channel);
   }
@@ -68,7 +76,7 @@ module.exports = class BotCommands {
    * @param {string} channel The Twitch channel to output message in.
    * @param {string} user A Twitch user.
    */
-  getUserDeletionsCommand(channel, user) {
+  getUserDeletionsCommand(channel: string, user: string): void {
     console.log(`Showing deleted for ${user} in #${channel}`);
     const num = this.db.getDeletedMessagesForUser(channel, user);
     this.client.say(
@@ -76,7 +84,7 @@ module.exports = class BotCommands {
       this.db.getBotMessage(channel, "specificUser", {
         channel: channel,
         user: user,
-        num_deleted_messages: num
+        num: num
       })
     );
   }
@@ -85,9 +93,9 @@ module.exports = class BotCommands {
    * Sends a top list of users with the most deleted messages.
    * @param {string} channel The Twitch channel to output message in.
    */
-  getTopListCommand(channel) {
+  getTopListCommand(channel: string): void {
     console.log(`Showing toplist for #${channel}`);
-    var topList = this.db.getTopListString(channel);
+    const topList = this.db.getTopListString(channel);
     if (topList) {
       this.client.say(
         channel,
@@ -100,4 +108,4 @@ module.exports = class BotCommands {
       );
     }
   }
-};
+}

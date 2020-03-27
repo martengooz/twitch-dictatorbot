@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable no-template-curly-in-string */
-"use strict";
+import Db from "../src/db";
+import { cfgPath } from "./testFunctions";
 
 jest.mock("fs");
 
-const DbHandler = require("../src/db");
 let db = {};
 let dbValidObj = {};
 let dbNoUsersObj = {};
@@ -13,7 +15,7 @@ let dbMissingKeyObj = {};
 let MOCK_FILE_INFO = {};
 
 function resetDb() {
-  db = new DbHandler({
+  db = new Db(cfgPath, {
     dbPath: "db",
     defaultValues: {
       channelName: "",
@@ -95,6 +97,7 @@ describe("db", () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     resetDb();
   });
   describe("add", () => {
@@ -129,11 +132,6 @@ describe("db", () => {
   });
 
   describe("read", () => {
-    test("reads from correct file.", () => {
-      const dbValid = db.getChannelDb("valid");
-      expect(dbValid).toStrictEqual(dbValidObj);
-    });
-
     test("creates new db if file not exist.", () => {
       db.createDb = jest.fn(() => dbValidObj);
 
@@ -288,10 +286,14 @@ describe("db", () => {
       const fs = require("fs");
       jest.mock("fs");
       fs.writeFileSync = jest.fn().mockImplementationOnce();
+      const createWebSecret = jest.spyOn(db, "createWebSecret");
 
       db.createWebSecret("nonexistant");
 
       expect(fs.writeFileSync.mock.calls.length).toBe(1);
+      expect(createWebSecret.mock.results).toEqual([
+        { type: "return", value: true }
+      ]);
     });
 
     test("createWebSecret returns when error writing to cfg", () => {
@@ -303,11 +305,12 @@ describe("db", () => {
       fs.writeFileSync = jest.fn().mockImplementationOnce(() => {
         throw new Error();
       });
-
       const createWebSecret = jest.spyOn(db, "createWebSecret");
+
       db.createWebSecret("nonexistant");
+
       expect(createWebSecret.mock.results).toEqual([
-        { type: "return", value: undefined }
+        { type: "return", value: false }
       ]);
     });
   });
@@ -402,7 +405,7 @@ describe("db", () => {
       db.getChannelDb = jest.fn(() => dbMissingKeyObj);
 
       const deletedMessages = db.getDeletedMessages("missing");
-      expect(deletedMessages).toStrictEqual({});
+      expect(deletedMessages).toStrictEqual([{}]);
     });
 
     test("for user returns 0 when user not exist", () => {
