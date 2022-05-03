@@ -1,14 +1,16 @@
 "use strict";
-require("console-stamp")(console, "yyyy-mm-dd HH:MM:ss");
-require("./helpers.js");
-require("./server.js");
-const cfg = require("./cfg.json");
-const tmi = require("tmi.js");
-const helper = require("./helpers.js");
-const DbHandler = require("./db.js");
-const BotCommands = require("./botCommands.js");
+import * as Console from "console-stamp";
+import { dehash } from "./helpers";
+import "./server";
+import * as cfg from "./cfg.json";
+import { Client } from "tmi.js";
 
-const db = new DbHandler(cfg);
+import Db from "./db";
+import BotCommands from "./botCommands";
+
+(window as any).console = new Console(console, "yyyy-mm-dd HH:MM:ss");
+
+const db = new Db(cfg);
 
 // Define configuration options
 const opts = {
@@ -23,18 +25,13 @@ const opts = {
   channels: cfg.channels
 };
 // Create a client with our options
-const client = new tmi.Client(opts);
+const client = Client(opts);
 const bot = new BotCommands(client, db);
 
-// Register our event handlers (defined below)
-client.on("message", onMessageHandler);
-client.on("messagedeleted", onMessageDeletedHandler);
-client.on("ban", onBanHandler);
-
-function connect(client) {
+function connect(client: Client): void {
   client
     .connect()
-    .then(data => {
+    .then(() => {
       console.log("Connected to Twitch");
       console.info(`Connected channels: ${cfg.channels}`);
     })
@@ -43,22 +40,24 @@ function connect(client) {
     });
 }
 
-function onBanHandler(channel, username, deletedMessage, userstate) {
-  // Remove from high score
-}
-
-function onMessageDeletedHandler(channel, username, deletedMessage, userstate) {
-  db.add(helper.dehash(channel), username);
+function onMessageDeletedHandler(channel: string, username: string): void {
+  db.add(dehash(channel), username);
 }
 
 // Called every time a message comes in
-function onMessageHandler(target, context, msg, self) {
+function onMessageHandler(
+  target: string,
+  context: object,
+  msg: string,
+  self: boolean
+): void {
   // Ignore messages from the bot
   if (self) {
     return;
   }
   bot.executeCommand(target, context, msg);
 }
+
 
 function getNumDeletedMessages(channel, user) {
     var num = 0;
@@ -103,6 +102,10 @@ function getTopListString(channel) {
 function reset(channel) {
     deletedMessages[channel] = [];
 }
+
+// Register our event handlers (defined below)
+client.on("message", onMessageHandler);
+client.on("messagedeleted", onMessageDeletedHandler);
 
 // Connect to Twitch:
 connect(client);
