@@ -1,7 +1,7 @@
 "use strict";
 
 import * as helper from "./helpers";
-import { Client } from "tmi.js";
+import { Client, Userstate } from "tmi.js";
 
 export default class BotCommands {
   client: Client;
@@ -17,7 +17,7 @@ export default class BotCommands {
    * @param {Object} context Tmi context object.
    * @param {string} msg The complete message from Twitch chat.
    */
-  executeCommand(target: string, context: Client, msg: string): void {
+  public executeCommand(target: string, context: Userstate, msg: string): void {
     const isMod = context.mod;
     const channel = helper.dehash(target);
     const message = msg.trim().split(" ");
@@ -25,7 +25,7 @@ export default class BotCommands {
     const argument = message[1];
 
     // If the command is known, let's execute it
-    if (command === "!dictatorbot" || command === "!botutiemersma") {
+    if (command === "!dic" || command === "!botutiemersma") {
       console.info(`Command recieved (${target}, "${msg}")`);
       if (argument) {
         if (argument === "help") {
